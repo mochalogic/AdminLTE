@@ -136,7 +136,12 @@ export const Box = (
       box =
         <div class={className.join(' ')} {...props}>
           {boxHeader}
-          {React.Children.map(boxBody, (item) => <div class={'box-body ' + (item.props && item.props.className)}>{item}</div> )}
+          {React.Children.map(boxBody, (item) => {
+            const boxBodyClass = ['box-body']
+            if (item.props && item.props.className) boxBodyClass.push(item.props.className)
+
+            return <div class={boxBodyClass.join(' ')}>{item}</div>
+          })}
           {boxFooter}
           {loading}
         </div>

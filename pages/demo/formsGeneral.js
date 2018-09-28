@@ -4,7 +4,7 @@ import Link from 'next/link'
 import fetch from 'isomorphic-unfetch'
 
 import {
-  typeMatch, matchChild,
+  typeMatch, matchChild, builder,
 
   Row,
   Col,
@@ -31,36 +31,67 @@ const Input = (
   {
     children,
     type, id, label, placeholder, help,
+    // value, disabled, checked // Pass Down by Defualt
     small, large,
     lg, md, sm, xs,
+    horizontal,
     ...props
   }) => {
   children = React.Children.toArray(children);
+  let input
 
   const inputClass = []
   var {match: inputGroups = [], children} = matchChild(children, [InputAddon, InputButton])
 
   switch (type) {
     case 'checkbox':
-      return (
-        <div class="checkbox">
-          <label>
-            <input type={type} id={id}/> {label}
-          </label>
-        </div>
-      )
-      break;
+      input = <div class="checkbox"><label><input {...props} type={type} id={id}/> {label}</label></div>
+
+      const colProps = builder()
+        .kvp('lg', 12 - lg, lg)
+        .kvp('md', 12 - md, md)
+        .kvp('sm', 12 - sm, sm)
+        .kvp('xs', 12 - xs, xs)
+        .kvp('lgOffset', lg, lg)
+        .kvp('mdOffset', md, md)
+        .kvp('smOffset', sm, sm)
+        .kvp('xsOffset', xs, xs)
+        .object()
+
+      if (horizontal) input = <Col {...colProps}>{input}</Col>
+
+      return <FormGroup>{input}</FormGroup>
     case 'file':
       break;
     default:
       inputClass.push('form-control')
   }
 
+  // Label
+  if (label) {
+    const labelClass = ['control-label']
+    if (horizontal) {
+      if (lg) { labelClass.push(`col-lg-${lg}`) }
+      if (md) { labelClass.push(`col-md-${md}`) }
+      if (sm) { labelClass.push(`col-sm-${sm}`) }
+      if (xs) { labelClass.push(`col-xs-${xs}`) }
+    }
+
+    label = <label for={id} class={labelClass.join(' ')}>{label}</label>
+  }
+
+  // Input
   if (small) inputClass.push('input-sm')
   if (large) inputClass.push('input-lg')
+  // input = <input class={inputClass.join(' ')} type={type} id={id} placeholder={placeholder}/>
+  input = (type == 'textarea')
+    ? <textarea {...props} class={inputClass.join(' ')} type={type} id={id} placeholder={placeholder}></textarea>
+    : <input {...props} class={inputClass.join(' ')} type={type} id={id} placeholder={placeholder}></input>
 
-  let input = <input class={inputClass.join(' ')} type={type} id={id} placeholder={placeholder}/>
+  // Help
+  if (help) help = <p class="help-block">{help}</p>
 
+  // Input Group
   if (inputGroups.length) {
     const inputGroupClass = ['input-group']
     if (small) inputGroupClass.push('input-group-sm')
@@ -74,13 +105,22 @@ const Input = (
       </div>)
   }
 
-  return (lg || md || sm || xs)
-    ? <Col lg={lg} md={md} sm={sm} xs={xs}>{input}</Col>
-    : <FormGroup>
-        {label && <label for={id}>{label}</label>}
-        {input}
-        {help && <p class="help-block">{help}</p>}
-      </FormGroup>
+  // FormGroup
+  let formGroup = <FormGroup>{label}{input}{help}</FormGroup>
+  if (horizontal) {
+    const horizontalClass = []
+    if (lg) { horizontalClass.push(`col-lg-${12 - lg}`) }
+    if (md) { horizontalClass.push(`col-md-${12 - md}`) }
+    if (sm) { horizontalClass.push(`col-sm-${12 - sm}`) }
+    if (xs) { horizontalClass.push(`col-xs-${12 - xs}`) }
+
+    formGroup = <FormGroup>{label}<div class={horizontalClass.join(' ')}>{input}{help}</div></FormGroup>
+  }
+
+
+  return (lg || md || sm || xs) && !horizontal
+    ? <Col {...{lg, md, sm, xs}}>{input}</Col>
+    : formGroup
 
 }
 const InputAddon = ({children, value, right = false, ...props}) => <div class="input-group-addon">{children || value}</div>
@@ -97,6 +137,12 @@ const Button = ({children, id, context, label, submit, className, right, flat, t
   const type = submit ? 'submit' : 'button'
 
   return <button class={buttonClass.join(' ')} type={type} id={id} data-toggle={toggle && 'dropdown'}>{children || label}{toggle && <Icon name="fa-caret-down"/>}</button>
+}
+
+const Form = ({children, horizontal, lg, md, sm, xs = 2, ...props}) => {
+  children = React.Children.toArray(children)
+
+  return <form class="form-horizontal">{children.map(child => React.cloneElement(child, {horizontal, lg, md, sm, xs}))}</form>
 }
 
 const H = ({children, title, h1, h2, h3, h4, h5, h6, margin, ...props}) => {
@@ -214,194 +260,124 @@ const HorizontalForm = () =>
   <Box context="info">
     <BoxHeader title="Horizontal Form"/>
     <BoxBody>
-      <form class="form-horizontal">
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
-          <div class="col-sm-10">
-            <input type="email" class="form-control" id="inputEmail3" placeholder="Email"/>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
-          <div class="col-sm-10">
-            <input type="password" class="form-control" id="inputPassword3" placeholder="Password"/>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <div class="col-sm-offset-2 col-sm-10">
-            <div class="checkbox">
-              <label>
-                <input type="checkbox"/> Remember me
-              </label>
-            </div>
-          </div>
-        </div>
-
-      </form>
+      <Form horizontal sm="2">
+        <Input type="email" id="horizontalFormEmail" label="Email" placeholder="Email"/>
+        <Input type="passsword" id="horizontalFormPassword" label="Password"/>
+        <Input type="checkbox" id="horizontalFormCheckbox" label="Remember me"/>
+      </Form>
     </BoxBody>
     <BoxFooter>
       <Button context="default" label="Cancel" submit/>
       <Button context="info" label="Sign in" submit right/>
     </BoxFooter>
   </Box>
-const HorizontalForm_ = () =>
-  <div class="box box-info">
-    <div class="box-header with-border">
-      <h3 class="box-title">Horizontal Form</h3>
-    </div>
-    <form class="form-horizontal">
-      <div class="box-body">
-        <div class="form-group">
-          <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
-          <div class="col-sm-10">
-            <input type="email" class="form-control" id="inputEmail3" placeholder="Email"/>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
-          <div class="col-sm-10">
-            <input type="password" class="form-control" id="inputPassword3" placeholder="Password"/>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="col-sm-offset-2 col-sm-10">
-            <div class="checkbox">
-              <label>
-                <input type="checkbox"/> Remember me
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="box-footer">
-        <button type="submit" class="btn btn-default">Cancel</button>
-        <button type="submit" class="btn btn-info pull-right">Sign in</button>
-      </div>
-    </form>
-  </div>
-
 const GeneralElements = () =>
   <Box context="warning">
-    <div class="box-header with-border">
-      <h3 class="box-title">General Elements</h3>
-    </div>
-    <div class="box-body">
-      <form role="form">
-        <div class="form-group">
-          <label>Text</label>
-          <input type="text" class="form-control" placeholder="Enter ..."/>
+    <BoxHeader title="General Elements" bordered/>
+    <BoxBody>
+      <Input type="text" label="Text" placeholder="Enter..."/>
+      <Input type="text" label="Text Disabled" placeholder="Enter..." disabled/>
+      <Input type="textarea" label="Textarea" placeholder="Enter..."/>
+      <Input type="textarea" label="Textarea Disabled" placeholder="Enter..." disabled/>
+
+
+
+      <div class="form-group has-success">
+        <label class="control-label" for="inputSuccess"><i class="fa fa-check"></i> Input with success</label>
+        <input type="text" class="form-control" id="inputSuccess" placeholder="Enter ..."/>
+        <span class="help-block">Help block with success</span>
+      </div>
+      <div class="form-group has-warning">
+        <label class="control-label" for="inputWarning"><i class="fa fa-bell-o"></i> Input with warning</label>
+        <input type="text" class="form-control" id="inputWarning" placeholder="Enter ..."/>
+        <span class="help-block">Help block with warning</span>
+      </div>
+      <div class="form-group has-error">
+        <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> Input with error</label>
+        <input type="text" class="form-control" id="inputError" placeholder="Enter ..."/>
+        <span class="help-block">Help block with error</span>
+      </div>
+      <div class="form-group">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"/>
+            Checkbox 1
+          </label>
         </div>
-        <div class="form-group">
-          <label>Text Disabled</label>
-          <input type="text" class="form-control" placeholder="Enter ..." disabled/>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"/>
+            Checkbox 2
+          </label>
         </div>
-        <div class="form-group">
-          <label>Textarea</label>
-          <textarea class="form-control" rows="3" placeholder="Enter ..."></textarea>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" disabled/>
+            Checkbox disabled
+          </label>
         </div>
-        <div class="form-group">
-          <label>Textarea Disabled</label>
-          <textarea class="form-control" rows="3" placeholder="Enter ..." disabled></textarea>
+      </div>
+      <div class="form-group">
+        <div class="radio">
+          <label>
+            <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked/>
+            Option one is this and that&mdash;be sure to include why it's great
+          </label>
         </div>
-        <div class="form-group has-success">
-          <label class="control-label" for="inputSuccess"><i class="fa fa-check"></i> Input with success</label>
-          <input type="text" class="form-control" id="inputSuccess" placeholder="Enter ..."/>
-          <span class="help-block">Help block with success</span>
+        <div class="radio">
+          <label>
+            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2"/>
+            Option two can be something else and selecting it will deselect option one
+          </label>
         </div>
-        <div class="form-group has-warning">
-          <label class="control-label" for="inputWarning"><i class="fa fa-bell-o"></i> Input with warning</label>
-          <input type="text" class="form-control" id="inputWarning" placeholder="Enter ..."/>
-          <span class="help-block">Help block with warning</span>
+        <div class="radio">
+          <label>
+            <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled/>
+            Option three is disabled
+          </label>
         </div>
-        <div class="form-group has-error">
-          <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> Input with error</label>
-          <input type="text" class="form-control" id="inputError" placeholder="Enter ..."/>
-          <span class="help-block">Help block with error</span>
-        </div>
-        <div class="form-group">
-          <div class="checkbox">
-            <label>
-              <input type="checkbox"/>
-              Checkbox 1
-            </label>
-          </div>
-          <div class="checkbox">
-            <label>
-              <input type="checkbox"/>
-              Checkbox 2
-            </label>
-          </div>
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" disabled/>
-              Checkbox disabled
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="radio">
-            <label>
-              <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked/>
-              Option one is this and that&mdash;be sure to include why it's great
-            </label>
-          </div>
-          <div class="radio">
-            <label>
-              <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2"/>
-              Option two can be something else and selecting it will deselect option one
-            </label>
-          </div>
-          <div class="radio">
-            <label>
-              <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled/>
-              Option three is disabled
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Select</label>
-          <select class="form-control">
-            <option>option 1</option>
-            <option>option 2</option>
-            <option>option 3</option>
-            <option>option 4</option>
-            <option>option 5</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Select Disabled</label>
-          <select class="form-control" disabled>
-            <option>option 1</option>
-            <option>option 2</option>
-            <option>option 3</option>
-            <option>option 4</option>
-            <option>option 5</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Select Multiple</label>
-          <select multiple class="form-control">
-            <option>option 1</option>
-            <option>option 2</option>
-            <option>option 3</option>
-            <option>option 4</option>
-            <option>option 5</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Select Multiple Disabled</label>
-          <select multiple class="form-control" disabled>
-            <option>option 1</option>
-            <option>option 2</option>
-            <option>option 3</option>
-            <option>option 4</option>
-            <option>option 5</option>
-          </select>
-        </div>
-      </form>
-    </div>
+      </div>
+      <div class="form-group">
+        <label>Select</label>
+        <select class="form-control">
+          <option>option 1</option>
+          <option>option 2</option>
+          <option>option 3</option>
+          <option>option 4</option>
+          <option>option 5</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Select Disabled</label>
+        <select class="form-control" disabled>
+          <option>option 1</option>
+          <option>option 2</option>
+          <option>option 3</option>
+          <option>option 4</option>
+          <option>option 5</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Select Multiple</label>
+        <select multiple class="form-control">
+          <option>option 1</option>
+          <option>option 2</option>
+          <option>option 3</option>
+          <option>option 4</option>
+          <option>option 5</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Select Multiple Disabled</label>
+        <select multiple class="form-control" disabled>
+          <option>option 1</option>
+          <option>option 2</option>
+          <option>option 3</option>
+          <option>option 4</option>
+          <option>option 5</option>
+        </select>
+      </div>
+    </BoxBody>
   </Box>
 const GeneralElements_ = () =>
   <div class="box box-warning">
@@ -528,6 +504,7 @@ const GeneralElements_ = () =>
 
 
 
+
 class Page extends Component {
   title = 'General Form Elements'
   tagLine = 'Preview'
@@ -538,11 +515,9 @@ class Page extends Component {
       <Layout title={this.title} tagLine={this.tagLine}>
         <Row>
           <Row md="6">
-            <HorizontalForm/>
             <GeneralElements/>
           </Row>
           <Col md="6">
-            <HorizontalForm_/>
             <GeneralElements_/>
           </Col>
         </Row>

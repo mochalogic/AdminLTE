@@ -1,4 +1,4 @@
-import library, {typeMatch, matchChild} from './library.js'
+import library, {typeMatch, matchChild, builder} from './library.js'
 
 import {Row, Col} from './base/Grid'
 import Icon from './base/Icon';
@@ -19,7 +19,7 @@ const Badge = ({children, tooltip, bg, className, value}) => {
 }
 
 export {
-  library, typeMatch, matchChild,
+  library, typeMatch, matchChild, builder,
 
   Row,
   Col,
