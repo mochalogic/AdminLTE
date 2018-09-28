@@ -300,7 +300,7 @@ const BoxSmalls = () => (
     </Box>
   </Row>)
 
-const BoxBehaviors = () => (
+const BoxBehaviors = ({loading, loadingHandler}) => (
   <Row>
     <Box md="3" context="default" collapsable collapsed>
       <BoxHeader bordered title="Expandable"/>
@@ -314,13 +314,13 @@ const BoxBehaviors = () => (
       <BoxHeader bordered title="Collapsable"/>
       <BoxBody>The body of the box</BoxBody>
     </Box>
-    <Box md="3" context="danger" loading>
+    <Box md="3" context="danger" loading={loading} onClick={loadingHandler}>
       <BoxHeader bordered title="Loading state"/>
-      <BoxBody>The body of the box</BoxBody>
+      <BoxBody>Click to toggle loading state</BoxBody>
     </Box>
   </Row>)
 
-const BoxBehaviorsSolid = () => (
+const BoxBehaviorsSolid = ({loading, loadingHandler}) => (
   <Row>
     <Box md="3" context="default" solid collapsable collapsed>
       <BoxHeader title="Expandable"/>
@@ -334,9 +334,9 @@ const BoxBehaviorsSolid = () => (
       <BoxHeader title="Collapsable"/>
       <BoxBody>The body of the box</BoxBody>
     </Box>
-    <Box md="3" context="danger" solid loading>
+    <Box md="3" context="danger" solid loading={loading} onClick={loadingHandler}>
       <BoxHeader title="Loading state"/>
-      <BoxBody>The body of the box</BoxBody>
+      <BoxBody>Click to toggle loading state</BoxBody>
     </Box>
   </Row>)
 
@@ -461,16 +461,25 @@ const WidgetPosts = () => (
 class Page extends Component {
   title = 'Widgets'
   tagLine = 'Preview Page'
-  componentDidMount()  { console.log(`componentDidMount (${this.title})`) }
+  componentDidMount()  {
+    console.log(`componentDidMount (${this.title})`)
+    this.setState({loading: true})
+  }
   componentDidUpdate() { console.log(`componentDidUpdate (${this.title})`) }
+  loadingHandler() {
+    console.log('loadingHandler');
+    this.setState({loading: !this.state.loading})
+  }
   render() {
+    const loading = this.state && this.state.loading
+
     return (
       <Layout title={this.title} tagLine={this.tagLine}>
         <BoxInfos/>
         <BoxInfosBg/>
         <BoxSmalls/>
-        <BoxBehaviors/>
-        <BoxBehaviorsSolid/>
+        <BoxBehaviors loading={loading} loadingHandler={this.loadingHandler.bind(this)}/>
+        <BoxBehaviorsSolid loading={loading} loadingHandler={this.loadingHandler.bind(this)}/>
         <BoxDirectChats/>
         <h2 class="page-header">Social Widgets</h2>
         <WidgetSocials/>

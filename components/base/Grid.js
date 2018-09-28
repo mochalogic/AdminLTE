@@ -1,4 +1,11 @@
-export const Row = ({children}) => <div class="row">{children}</div>
+export const Row = ({children, lg, md, sm, xs, className, ...props}) => {
+  const rowClass = ['row']
+  if (className) rowClass.push(className)
+
+  const row = <div class={rowClass.join(' ')}>{children}</div>
+
+  return (lg || md || sm || xs) ? <Col lg={lg} md={md} sm={sm} xs={xs}>{row}</Col> : row
+}
 
 export const Col = ({children, lg, md, sm, xs, className, ...props}) => {
   className = className ? [className] : []

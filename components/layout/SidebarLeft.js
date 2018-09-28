@@ -1,8 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import {Icon} from '../'
-
-import lib from '../lib'
+import {Icon, typeMatch} from '../'
 
 const WidgetUser = () => (
   <div class="user-panel">
@@ -59,11 +57,11 @@ const MenuItem = ({children, header = false, selected = false, icon = 'fa-circle
     children,
     (child) => {
       switch (true) {
-        case lib.typeMatch(child, MenuItem):
+        case typeMatch(child, MenuItem):
           menuItems.push(child);
           selected = selectedChildren(selected, child)
           break;
-        case lib.typeMatch(child, MenuTool):
+        case typeMatch(child, MenuTool):
           menuTools.push(child);
           break;
       }

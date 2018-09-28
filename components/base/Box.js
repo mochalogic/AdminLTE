@@ -1,4 +1,4 @@
-import library, {typeMatch} from '../library.js'
+import library, {typeMatch, matchChild} from '../library.js'
 import Icon from './Icon'
 import {Row, Col} from './Grid'
 
@@ -6,7 +6,9 @@ import {Row, Col} from './Grid'
 //BoxInfo
 //BoxWidget
 
-export const Box = ({
+
+export const Box = (
+  {
     children,
     //Types
     small = false,
@@ -29,64 +31,28 @@ export const Box = ({
 
     ...props
   }) => {
+  children = React.Children.toArray(children);
   className = className ? [className] : [];
 
   // Child Controls
   let box = null;
-  let boxHeader = null; //Only One!
-  let boxToolbox = [];
-  let boxBody = [];
-  let boxProgress = null; //Only One!
-  let boxFooter = null; //Only One!
-  let icon = null;
-
-  const ch = React.Children.toArray(children);
-  console.log({ch});
-
-  const matchChild = (children, type) => children.reduce((acc, child) => {
-    (typeMatch(child, type)) ? acc.children.push(child) : acc.remainder.push(child)
-    return acc;
-  }, {children: [], remainder: []})
-
-  const ret = matchChild(ch, BoxHeader)
-  console.log({ret});
-
-  React.Children.forEach(
-    children,
-    (child) => {
-      switch (true) {
-        case typeMatch(child, Icon):
-          icon = child; //Only One!
-          break;
-        case typeMatch(child, BoxHeader):
-          boxHeader = child; //Only One!
-          break;
-        case typeMatch(child, BoxTool):
-          boxToolbox.push(child);
-          break;
-        case typeMatch(child, BoxBody):
-          boxBody.push(child);
-          break;
-        case typeMatch(child, BoxProgress):
-          boxProgress = child;
-          break;
-        case typeMatch(child, BoxFooter):
-          boxFooter = child; //Only One!
-          break;
-      }
-    }
-  )
+  var {match: icon = [], children} = matchChild(children, Icon, true)
+  var {match: boxHeader = [], children} = matchChild(children, BoxHeader, true)
+  var {match: boxToolbox = [], children} = matchChild(children, BoxTool)
+  var {match: boxBody = [], children} = matchChild(children, BoxBody)
+  var {match: boxProgress = [], children} = matchChild(children, BoxProgress, true)
+  var {match: boxFooter = [], children} = matchChild(children, BoxFooter, true)
 
   switch (true) {
     case small:
       className.push('small-box')
-      if (bg) { className.push(`bg-${bg}`)}
+      if (bg) className.push(`bg-${bg}`)
 
-      if (icon) icon = <div class="icon">{icon}</div>
+      icon = icon && <div class="icon">{icon}</div>
 
-      if (boxFooter) boxFooter = <a href="#" class="small-box-footer">{boxFooter} <Icon name="fa-arrow-circle-right"/></a>
+      boxFooter = boxFooter && <a href="#" class="small-box-footer">{boxFooter} <Icon name="fa-arrow-circle-right"/></a>
 
-      box = (
+      box =
         <div class={className.join(' ')}>
           <div class="inner">
             <h3>{boxBody}</h3>
@@ -94,24 +60,22 @@ export const Box = ({
           </div>
           {icon}
           {boxFooter}
-        </div>)
+        </div>
       break;
     case info:
       className.push('info-box')
-      if (bg) { className.push(`bg-${bg}`)}
+      if (bg) className.push(`bg-${bg}`)
 
-      // console.log({f: 'box', boxProgress, icon, p: icon && icon.props});
-
-      if (boxProgress) {
-        boxProgress = <>
+      boxProgress = boxProgress &&
+        <>
           <div class="progress"><div class="progress-bar" style={{width: `${boxProgress.props.value}%`}}></div></div>
           <span class="progress-description">{boxProgress.props.description}</span>
         </>
-      }
 
-      if (icon) icon = <span class={`info-box-icon ${icon.props.bg && `bg-${icon.props.bg}`}`}>{icon}</span>
+      //if (icon) icon = <span class={`info-box-icon ${icon.props.bg && `bg-${icon.props.bg}`}`}>{icon}</span>
+      icon = icon && <span class={`info-box-icon ${icon.props.bg && `bg-${icon.props.bg}`}`}>{icon}</span>
 
-      box = (
+      box =
         <div class={className.join(' ')}>
           {icon}
           <div class="info-box-content">
@@ -119,19 +83,18 @@ export const Box = ({
             <span class="info-box-number">{boxBody}</span>
             {boxProgress}
           </div>
-        </div>)
+        </div>
       break;
     case widget:
       className.push('box')
       className.push('box-widget')
 
-      box = (
+      box =
         <div class={className.join(' ')}>
           {boxHeader}
           {React.Children.map(boxBody, (item) => <div class={'box-body ' + (item.props && item.props.className)}>{item}</div> )}
           {boxFooter}
         </div>
-      )
 
       break;
     default:
@@ -147,25 +110,20 @@ export const Box = ({
         boxToolbox.push(<button type="button" class="btn btn-box-tool" data-widget="collapse" key="collapsable">{collapsableIcon}</button>)
       }
 
-      if (removable) {
-        boxToolbox.push(<button type="button" class="btn btn-box-tool" data-widget="remove" key="removable"><Icon name="fa-times"/></button>)
-      }
+      if (removable) boxToolbox.push(<button type="button" class="btn btn-box-tool" data-widget="remove" key="removable"><Icon name="fa-times"/></button>)
 
-      if (loading) {
-        loading = <div class="overlay"><Icon name="fa-refresh fa-spin"/></div>
-      }
+      loading = loading && <div class="overlay"><Icon name="fa-refresh fa-spin"/></div>
 
       if (boxHeader) {
         const boxHeaderClass = ['box-header']
         if (boxHeader.props.bordered) boxHeaderClass.push('with-border')
         if (boxHeader.props.className) boxHeaderClass.push(boxHeader.props.className)
 
-        boxHeader = (
+        boxHeader =
           <div class={boxHeaderClass.join(' ')}>
             {(boxHeader.props.title && <h3 class="box-title">{boxHeader.props.title}</h3>) || boxHeader}
             {boxToolbox && <div class="box-tools pull-right">{boxToolbox}</div>}
           </div>
-        )
       }
 
       if (boxFooter) {
@@ -175,14 +133,13 @@ export const Box = ({
         boxFooter = <div class={boxFooterClass.join(' ')}>{boxFooter}</div>
       }
 
-      box = (
-        <div class={className.join(' ')}>
+      box =
+        <div class={className.join(' ')} {...props}>
           {boxHeader}
           {React.Children.map(boxBody, (item) => <div class={'box-body ' + (item.props && item.props.className)}>{item}</div> )}
           {boxFooter}
           {loading}
         </div>
-      )
   }
 
   return <Col {...props}>{box}</Col>
