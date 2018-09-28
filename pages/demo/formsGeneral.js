@@ -277,8 +277,8 @@ const GeneralElements = () =>
     <BoxBody>
       <Input type="text" label="Text" placeholder="Enter..."/>
       <Input type="text" label="Text Disabled" placeholder="Enter..." disabled/>
-      <Input type="textarea" label="Textarea" placeholder="Enter..."/>
-      <Input type="textarea" label="Textarea Disabled" placeholder="Enter..." disabled/>
+      <Input type="textarea" label="Textarea" placeholder="Enter..." rows="3"/>
+      <Input type="textarea" label="Textarea Disabled" placeholder="Enter..." rows="3" disabled/>
 
 
 
