@@ -31,8 +31,12 @@ export const builder = (builder = null) => {
       test && value && builder.push(value)
       return fluent
     },
-    ssv: () => builder.join(' '),
-    object: () => ({...builder})
+
+    toObject: () => ({...builder}),
+    toClassName: () => {
+      const className = builder.join(' ').trim()
+      return className ? {className} : null
+    }
   }
 
   return fluent

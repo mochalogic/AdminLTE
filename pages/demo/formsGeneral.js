@@ -25,104 +25,126 @@ import {
   imgRoot
 } from '../../components'
 
-const FormGroup = ({children, ...props}) => <div class="form-group">{children}</div>
+// TODO: On FormGroup if fromInput = true, each child, set fromGroup = true
+
+
+const isArray = (test) => Array.isArray(test)
+const isTrue = (test) => test || false;
+const isDefined = (test) => test !== undefined
+const isNull = (test) => test === null
+const isNaN = (test) => test === NaN
+const isEmpty = (test) => !isDefined(test) || isNull(test) || isNaN(test) || test === ''
+const cloneFirst = (elements, additionalProps = {}) => isArray(elements) && elements.length ? React.cloneElement(elements[0], additionalProps) : null
+
+const FormGroup = ({children, success, warning, error, fromInput = false, ...props}) => {
+  const formGroupClass = builder('form-group')
+    .append('has-success', isTrue(success))
+    .append('has-warning', isTrue(warning))
+    .append('has-error', isTrue(error))
+    .toClassName()
+
+  return <div {...formGroupClass}>{fromInput ? children : React.Children.map(child => React.cloneElement(child, {fromGroup: true}))}</div>
+}
 
 const Input = (
   {
     children,
-    type, id, label, placeholder, help,
+    type, id,
+    label, placeholder, help,
     // value, disabled, checked // Pass Down by Defualt
     small, large,
     lg, md, sm, xs,
+    success, warning, error,
     horizontal,
+    formGroup = false,
     ...props
   }) => {
   children = React.Children.toArray(children);
-  let input
-
-  const inputClass = []
   var {match: inputGroups = [], children} = matchChild(children, [InputAddon, InputButton])
+  var {match: inputLabels = [], children} = matchChild(children, InputLabel)
+  var {match: inputHelps = [], children} = matchChild(children, InputHelp)
 
-  switch (type) {
-    case 'checkbox':
-      input = <div class="checkbox"><label><input {...props} type={type} id={id}/> {label}</label></div>
+  if (type === 'checkbox' || type === 'radio') {
+    const colProps = builder()
+      .kvp('lg', 12 - lg, isTrue(lg))
+      .kvp('md', 12 - md, isTrue(md))
+      .kvp('sm', 12 - sm, isTrue(sm))
+      .kvp('xs', 12 - xs, isTrue(xs))
+      .kvp('lgOffset', lg, isTrue(lg))
+      .kvp('mdOffset', md, isTrue(md))
+      .kvp('smOffset', sm, isTrue(sm))
+      .kvp('xsOffset', xs, isTrue(xs))
+      .toObject()
 
-      const colProps = builder()
-        .kvp('lg', 12 - lg, lg)
-        .kvp('md', 12 - md, md)
-        .kvp('sm', 12 - sm, sm)
-        .kvp('xs', 12 - xs, xs)
-        .kvp('lgOffset', lg, lg)
-        .kvp('mdOffset', md, md)
-        .kvp('smOffset', sm, sm)
-        .kvp('xsOffset', xs, xs)
-        .object()
+    // Radio 'name' will get passed as props
+    const input = <div class={type}><label><input {...props} type={type} id={id}/> {label}</label></div>
+    const inputGroup = horizontal ? <Col {...colProps}>{input}</Col> : input
 
-      if (horizontal) input = <Col {...colProps}>{input}</Col>
-
-      return <FormGroup>{input}</FormGroup>
-    case 'file':
-      break;
-    default:
-      inputClass.push('form-control')
-  }
-
-  // Label
-  if (label) {
-    const labelClass = ['control-label']
-    if (horizontal) {
-      if (lg) { labelClass.push(`col-lg-${lg}`) }
-      if (md) { labelClass.push(`col-md-${md}`) }
-      if (sm) { labelClass.push(`col-sm-${sm}`) }
-      if (xs) { labelClass.push(`col-xs-${xs}`) }
-    }
-
-    label = <label for={id} class={labelClass.join(' ')}>{label}</label>
+    return (formGroup)
+      ? inputGroup
+      : <FormGroup {...{success, warning, error} } fromInput={true}>{inputGroup}</FormGroup>
   }
 
   // Input
-  if (small) inputClass.push('input-sm')
-  if (large) inputClass.push('input-lg')
-  // input = <input class={inputClass.join(' ')} type={type} id={id} placeholder={placeholder}/>
-  input = (type == 'textarea')
-    ? <textarea {...props} class={inputClass.join(' ')} type={type} id={id} placeholder={placeholder}></textarea>
-    : <input {...props} class={inputClass.join(' ')} type={type} id={id} placeholder={placeholder}></input>
-
-  // Help
-  if (help) help = <p class="help-block">{help}</p>
+  const inputClass = builder()
+    .append('form-control', (type !== 'file'))
+    .append('input-sm', isTrue(small))
+    .append('input-lg', isTrue(large))
+    .toClassName()
+  const input = (type == 'textarea')
+    ? <textarea {...props} {...inputClass} type={type} id={id} placeholder={placeholder}></textarea>
+    : <input {...props} {...inputClass} type={type} id={id} placeholder={placeholder}></input>
 
   // Input Group
-  if (inputGroups.length) {
-    const inputGroupClass = ['input-group']
-    if (small) inputGroupClass.push('input-group-sm')
-    if (large) inputGroupClass.push('input-group-lg')
+  const inputGroupClass = builder()
+    .append('input-group', inputGroups.length)
+    .append('input-group-sm', isTrue(inputGroups.length && small))
+    .append('input-group-lg', isTrue(inputGroups.length && large))
+    .toClassName()
+  const inputGroup = (
+    <div {...inputGroupClass}>
+      {inputGroups.filter((inputGroup) => !inputGroup.props.right)}
+      {input}
+      {inputGroups.filter((inputGroup) => inputGroup.props.right)}
+    </div>)
 
-    input = (
-      <div class={inputGroupClass.join(' ')}>
-        {inputGroups.filter((inputGroup) => !inputGroup.props.right )}
-        {input}
-        {inputGroups.filter((inputGroup) => inputGroup.props.right )}
-      </div>)
-  }
+  // If sized and not horizontal
+  if ((lg || md || sm || xs) && !horizontal) return <Col {...{lg, md, sm, xs}}>{inputGroup}</Col>
+
+  // Label
+  const inputLabel = cloneFirst(inputLabels, {id, horizontal, lg, md, sm, xs}) || (label) && <InputLabel {...{id, horizontal, lg, md, sm, xs}}>{label}</InputLabel>
+
+  // Help
+  const inputHelp = cloneFirst(inputHelps) || (help) && <InputHelp>{help}</InputHelp>
 
   // FormGroup
-  let formGroup = <FormGroup>{label}{input}{help}</FormGroup>
-  if (horizontal) {
-    const horizontalClass = []
-    if (lg) { horizontalClass.push(`col-lg-${12 - lg}`) }
-    if (md) { horizontalClass.push(`col-md-${12 - md}`) }
-    if (sm) { horizontalClass.push(`col-sm-${12 - sm}`) }
-    if (xs) { horizontalClass.push(`col-xs-${12 - xs}`) }
-
-    formGroup = <FormGroup>{label}<div class={horizontalClass.join(' ')}>{input}{help}</div></FormGroup>
-  }
-
-
-  return (lg || md || sm || xs) && !horizontal
-    ? <Col {...{lg, md, sm, xs}}>{input}</Col>
-    : formGroup
+  const horizontalClass = builder()
+    .append(`col-lg-${12 - lg}`, isTrue(horizontal && lg))
+    .append(`col-md-${12 - md}`, isTrue(horizontal && md))
+    .append(`col-sm-${12 - sm}`, isTrue(horizontal && sm))
+    .append(`col-xs-${12 - xs}`, isTrue(horizontal && xs))
+    .toClassName()
+  return (
+    <FormGroup {...{success, warning, error}} fromInput={true}>
+      {inputLabel}
+      <div {...horizontalClass}>
+        {inputGroup}
+        {inputHelp}
+      </div>
+    </FormGroup>)
 
 }
+const InputLabel = ({children, id, horizontal, lg, md, sm, xs, ...props}) => {
+  const labelClass = builder('control-label')
+    .append(`col-lg-${lg}`, isTrue(horizontal && lg))
+    .append(`col-md-${md}`, isTrue(horizontal && md))
+    .append(`col-sm-${sm}`, isTrue(horizontal && sm))
+    .append(`col-xs-${xs}`, isTrue(horizontal && xs))
+    .toClassName()
+
+  return <label for={id} {...labelClass}>{children}</label>
+}
+const InputHelp = ({children, ...props}) => <p class="help-block">{children}</p>
 const InputAddon = ({children, value, right = false, ...props}) => <div class="input-group-addon">{children || value}</div>
 const InputButton = ({children, value, right = false, ...props}) => <div class="input-group-btn">{children || value}</div>
 
@@ -139,10 +161,15 @@ const Button = ({children, id, context, label, submit, className, right, flat, t
   return <button class={buttonClass.join(' ')} type={type} id={id} data-toggle={toggle && 'dropdown'}>{children || label}{toggle && <Icon name="fa-caret-down"/>}</button>
 }
 
-const Form = ({children, horizontal, lg, md, sm, xs = 2, ...props}) => {
+const Form = ({children, horizontal, lg, md, sm, xs, ...props}) => {
   children = React.Children.toArray(children)
+  const formClass = builder()
+    .append('form-horizontal', isTrue(horizontal))
+    .toClassName()
 
-  return <form class="form-horizontal">{children.map(child => React.cloneElement(child, {horizontal, lg, md, sm, xs}))}</form>
+  if (horizontal && !(lg || md || sm || xs)) xs = 2 // Default to xs = 2 if lg, md, sm or xs DNE
+
+  return <form {...formClass}>{children.map(child => React.cloneElement(child, {horizontal, lg, md, sm, xs}))}</form>
 }
 
 const H = ({children, title, h1, h2, h3, h4, h5, h6, margin, ...props}) => {
@@ -261,7 +288,7 @@ const HorizontalForm = () =>
     <BoxHeader title="Horizontal Form"/>
     <BoxBody>
       <Form horizontal sm="2">
-        <Input type="email" id="horizontalFormEmail" label="Email" placeholder="Email"/>
+        <Input type="email" id="horizontalFormEmail" label="Email" placeholder="Email" help="Help Block"/>
         <Input type="passsword" id="horizontalFormPassword" label="Password"/>
         <Input type="checkbox" id="horizontalFormCheckbox" label="Remember me"/>
       </Form>
@@ -279,44 +306,29 @@ const GeneralElements = () =>
       <Input type="text" label="Text Disabled" placeholder="Enter..." disabled/>
       <Input type="textarea" label="Textarea" placeholder="Enter..." rows="3"/>
       <Input type="textarea" label="Textarea Disabled" placeholder="Enter..." rows="3" disabled/>
+      <Input type="text" id="generalElementsSuccess" placeholder="Enter..." help="Help block with success" success>
+        <InputLabel><Icon name="fa-check"/> Input with success</InputLabel>
+      </Input>
+      <Input type="text" id="generalElementsWarning" placeholder="Enter..." help="Help block with warning" warning>
+        <InputLabel><Icon name="fa-bell-o"/> Input with warning</InputLabel>
+      </Input>
+      <Input type="text" id="generalElementsError" placeholder="Enter..." help="Help block with error" error>
+        <InputLabel><Icon name="fa-times-circle-o"/> Input with error</InputLabel>
+      </Input>
+      <FormGroup>
+        <Input type="checkbox" label="Checkbox1"/>
+        <Input type="checkbox" label="Checkbox2"/>
+        <Input type="checkbox" label="Checkbox disabled" disabled/>
+      </FormGroup>
+      <FormGroup>
+        <Input formGroup={true} type="radio" id="generalElementsRadio1" name="generalElementsRadio" label="Option one is this and that&mdash;be sure to include why it's great"/>
+        <Input formGroup={true} type="radio" id="generalElementsRadio2" name="generalElementsRadio" label="Option two can be something else and selecting it will deselect option one"/>
+        <Input formGroup={true} type="radio" id="generalElementsRadio3" name="generalElementsRadio" label="Another 1"/>
+        <Input formGroup={true} type="radio" id="generalElementsRadio4" name="generalElementsRadio" label="Another 2"/>
+        <Input formGroup={true} type="radio" id="generalElementsRadio5" name="generalElementsRadio" label="Another 3"/>
+        <Input formGroup={true} type="radio" id="generalElementsRadioDisabled" name="generalElementsRadio" label="Option three is disabled" disabled/>
+      </FormGroup>
 
-
-
-      <div class="form-group has-success">
-        <label class="control-label" for="inputSuccess"><i class="fa fa-check"></i> Input with success</label>
-        <input type="text" class="form-control" id="inputSuccess" placeholder="Enter ..."/>
-        <span class="help-block">Help block with success</span>
-      </div>
-      <div class="form-group has-warning">
-        <label class="control-label" for="inputWarning"><i class="fa fa-bell-o"></i> Input with warning</label>
-        <input type="text" class="form-control" id="inputWarning" placeholder="Enter ..."/>
-        <span class="help-block">Help block with warning</span>
-      </div>
-      <div class="form-group has-error">
-        <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> Input with error</label>
-        <input type="text" class="form-control" id="inputError" placeholder="Enter ..."/>
-        <span class="help-block">Help block with error</span>
-      </div>
-      <div class="form-group">
-        <div class="checkbox">
-          <label>
-            <input type="checkbox"/>
-            Checkbox 1
-          </label>
-        </div>
-        <div class="checkbox">
-          <label>
-            <input type="checkbox"/>
-            Checkbox 2
-          </label>
-        </div>
-        <div class="checkbox">
-          <label>
-            <input type="checkbox" disabled/>
-            Checkbox disabled
-          </label>
-        </div>
-      </div>
       <div class="form-group">
         <div class="radio">
           <label>
