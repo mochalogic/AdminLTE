@@ -22,14 +22,14 @@ export const matchChild = (children, types, single = false) => children.reduce((
 export const builder = (builder = null) => {
   builder = builder ? Array.isArray(builder) ? builder : [builder] : []
 
-  const fluent = {
+  const builderWrapper = {
     kvp: (key, value, test = true) => {
       test && key && value && (builder[key] = value)
-      return fluent
+      return builderWrapper
     },
     append: (value, test = true) => {
       test && value && builder.push(value)
-      return fluent
+      return builderWrapper
     },
 
     toObject: () => ({...builder}),
@@ -39,7 +39,7 @@ export const builder = (builder = null) => {
     }
   }
 
-  return fluent
+  return builderWrapper
 }
 
 
