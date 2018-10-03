@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import {findDOMNode} from 'react-dom'
 
 import {
   typeMatch, matchChild, builder,
@@ -116,117 +117,284 @@ export const gridBuilder = (lg = null, md = null, sm = null, xs = null, lgOffset
   return gridBuilderWrapper
 }
 
-export const Input = (
-  {
-    children,
-    type, id,
-    label, placeholder, help,
-    // value, disabled, checked // Pass Down by Defualt
-    small, large,
-    lg, md, sm, xs,
-    success, warning, error,
-    horizontal,
-    className,
-    wrapInFormGroup = true,
-    ...props
-  }) => {
-  children = React.Children.toArray(children);
-  var {match: inputGroups = [], children} = matchChild(children, [InputAddon, InputButton])
-  var {match: inputLabels = [], children} = matchChild(children, InputLabel)
-  var {match: inputHelps = [], children} = matchChild(children, InputHelp)
 
-  const inputGrid = gridBuilder(lg, md, sm, xs)
-  // console.log({
-  //   hasValue: inputGrid.hasValue(),
-  //   invert: inputGrid.invert().value,
-  //   inputGrid: inputGrid.value,
-  //   generateOffset: inputGrid.generateOffset().value,
-  //   swapOffset: inputGrid.swapOffset().value,
-  //   generateOffsetSwapOffset: inputGrid.generateOffset().swapOffset().value,
-  //   inputGrid2: inputGrid.value,
-  // });
-  let formGroup
 
-  if (type === 'checkbox' || type === 'radio') {
-    // Label
-    label = (inputLabels.length && inputLabels[0].props.children) || label
 
-    // Help Block
-    const inputHelp = cloneFirst(inputHelps) || (help) && <InputHelp>{help}</InputHelp>
 
-    // Input
-    // Radio 'name' will get passed as props
-    const input = <div class={type}><label><input {...props} type={type} id={id}/> {label}{inputHelp}</label></div>
 
-    // Input Group
-    const inputGroup = input
 
-    // Horizontal Group (Input Group & Help Block)
-    const horizontalClass = horizontal ? inputGrid.generateOffset().swapOffset().toClassName(true) : null
-    const horizontalGroup = horizontalClass
-      ? <div {...horizontalClass}>{inputGroup}</div>
-      : <>{inputGroup}</>
 
-    // Form Group
-    formGroup = horizontalGroup
-  } else {
-    // Label
-    const inputLabel = cloneFirst(inputLabels, {id, horizontal, ...inputGrid.value}) || (label && <InputLabel {...{id, horizontal, ...inputGrid.value}}>{label}</InputLabel>)
 
-    // Help Block
-    const inputHelp = cloneFirst(inputHelps) || (help) && <InputHelp>{help}</InputHelp>
 
-    // Input
-    const inputClass = builder(className)
-      .append('form-control', (type !== 'file'))
-      .append('input-sm', isTrue(small))
-      .append('input-lg', isTrue(large))
-      .toClassName()
-    let input
-    switch (type) {
-      case 'textarea':
-        input = <textarea {...props} {...inputClass} type={type} id={id} placeholder={placeholder}></textarea>
-        break;
-      case 'select':
-        input = <select {...props} {...inputClass} id={id}>{children}</select>
-        break;
-      default:
-        input = <input {...props} {...inputClass} type={type} id={id} placeholder={placeholder}></input>
+
+
+
+
+
+
+
+
+export class Input extends Component {
+  colorpicker = null
+  constructor() {
+    super()
+    this.colorpickerAssign = this.colorpickerAssign.bind(this)
+  }
+  componentDidMount()  {
+    if (this.colorpicker) $(findDOMNode(this.colorpicker)).colorpicker()
+    // this.colorpickers.forEach(colorpicker => $(findDOMNode(colorpicker)).colorpicker())
+  }
+  colorpickerAssign(colorpicker) { this.colorpicker = colorpicker }
+
+
+  render() {
+    var {
+      children,
+      type, id,
+      label, placeholder, help,
+      // value, disabled, checked // Pass Down by Defualt
+      small, large,
+      lg, md, sm, xs,
+      success, warning, error,
+      horizontal,
+      className,
+      wrapInFormGroup = true,
+
+      refInput,
+
+      ...props
+    } = this.props;
+
+    console.log(props);
+
+    children = React.Children.toArray(children);
+    var {match: inputGroups = [], children} = matchChild(children, [InputAddon, InputButton])
+    var {match: inputLabels = [], children} = matchChild(children, InputLabel)
+    var {match: inputHelps = [], children} = matchChild(children, InputHelp)
+
+    const inputGrid = gridBuilder(lg, md, sm, xs)
+    let formGroup
+
+    if (type === 'checkbox' || type === 'radio') {
+      // Label
+      label = (inputLabels.length && inputLabels[0].props.children) || label
+
+      // Help Block
+      const inputHelp = cloneFirst(inputHelps) || (help) && <InputHelp>{help}</InputHelp>
+
+      // Input
+      // Radio 'name' will get passed as props
+      const input = <div class={type}><label><input {...props} type={type} id={id}/> {label}{inputHelp}</label></div>
+
+      // Input Group
+      const inputGroup = input
+
+      // Horizontal Group (Input Group & Help Block)
+      const horizontalClass = horizontal ? inputGrid.generateOffset().swapOffset().toClassName(true) : null
+      const horizontalGroup = horizontalClass
+        ? <div {...horizontalClass}>{inputGroup}</div>
+        : <>{inputGroup}</>
+
+      // Form Group
+      formGroup = horizontalGroup
+    } else {
+      // Label
+      const inputLabel = cloneFirst(inputLabels, {id, horizontal, ...inputGrid.value}) || (label && <InputLabel {...{id, horizontal, ...inputGrid.value}}>{label}</InputLabel>)
+
+      // Help Block
+      const inputHelp = cloneFirst(inputHelps) || (help) && <InputHelp>{help}</InputHelp>
+
+      const thisSet = (property) => (value) => this[property] = value
+
+      // Input
+      const inputClass = builder(className)
+        .append('form-control', (type !== 'file'))
+        .append('input-sm', isTrue(small))
+        .append('input-lg', isTrue(large))
+        .toClassName()
+      let input
+      switch (type) {
+        case 'textarea':
+          input = <textarea {...props} {...inputClass} type={type} id={id} placeholder={placeholder}></textarea>
+          break;
+        case 'select':
+          input = <select {...props} {...inputClass} id={id}>{children}</select>
+          break;
+        default:
+          switch (type) {
+            case 'colorpicker':
+              refInput = this.colorpickerAssign
+              break;
+          }
+
+          input = <input {...props} {...inputClass} type={type} id={id} placeholder={placeholder} ref={refInput}/>
+      }
+
+      // Input Group
+      const inputGroupClass = builder()
+        .append('input-group', inputGroups.length)
+        .append('input-group-sm', isTrue(inputGroups.length && small))
+        .append('input-group-lg', isTrue(inputGroups.length && large))
+        .toClassName()
+      const refInputGroup = inputGroups.some((inputGroup) => inputGroup.props.colorpicker) && this.colorpickerAssign
+      const inputGroup = inputGroups.length
+        ? <div {...inputGroupClass} ref={refInputGroup}>
+            {inputGroups.filter((inputGroup) => !inputGroup.props.right)}
+            {input}
+            {inputGroups.filter((inputGroup) => inputGroup.props.right)}
+          </div>
+        : input
+
+      // If sized and not horizontal
+      //NOTE: SHUNT
+      if (inputGrid.hasValue() && !horizontal) return <Col {...inputGrid.value}>{inputGroup}</Col>
+
+      // Horizontal Group (Input Group & Help Block)
+      const horizontalClass = horizontal ? inputGrid.invert().toClassName(true) : null
+      const horizontalGroup = horizontalClass
+        ? <div {...horizontalClass}>{inputGroup}{inputHelp}</div>
+        : <>{inputGroup}{inputHelp}</>
+
+      // Form Group
+      formGroup = <>{inputLabel}{horizontalGroup}</>
     }
 
-    // Input Group
-    const inputGroupClass = builder()
-      .append('input-group', inputGroups.length)
-      .append('input-group-sm', isTrue(inputGroups.length && small))
-      .append('input-group-lg', isTrue(inputGroups.length && large))
-      .toClassName()
-    const inputGroup = inputGroups.length
-      ? <div {...inputGroupClass}>
-          {inputGroups.filter((inputGroup) => !inputGroup.props.right)}
-          {input}
-          {inputGroups.filter((inputGroup) => inputGroup.props.right)}
-        </div>
-      : input
-
-    // If sized and not horizontal
-    //NOTE: SHUNT
-    if (inputGrid.hasValue() && !horizontal) return <Col {...inputGrid.value}>{inputGroup}</Col>
-
-    // Horizontal Group (Input Group & Help Block)
-    const horizontalClass = horizontal ? inputGrid.invert().toClassName(true) : null
-    const horizontalGroup = horizontalClass
-      ? <div {...horizontalClass}>{inputGroup}{inputHelp}</div>
-      : <>{inputGroup}{inputHelp}</>
-
-    // Form Group
-    formGroup = <>{inputLabel}{horizontalGroup}</>
+    return (wrapInFormGroup)
+      ? <FormGroup {...{success, warning, error}} wrapInFormGroup={false}>{formGroup}</FormGroup>
+      : formGroup
   }
-
-  return (wrapInFormGroup)
-    ? <FormGroup {...{success, warning, error}} wrapInFormGroup={false}>{formGroup}</FormGroup>
-    : formGroup
-
 }
+
+
+
+
+
+// export const Input = (
+//   {
+//     children,
+//     type, id,
+//     label, placeholder, help,
+//     // value, disabled, checked // Pass Down by Defualt
+//     small, large,
+//     lg, md, sm, xs,
+//     success, warning, error,
+//     horizontal,
+//     className,
+//     wrapInFormGroup = true,
+//     ...props
+//   }) => {
+//   children = React.Children.toArray(children);
+//   var {match: inputGroups = [], children} = matchChild(children, [InputAddon, InputButton])
+//   var {match: inputLabels = [], children} = matchChild(children, InputLabel)
+//   var {match: inputHelps = [], children} = matchChild(children, InputHelp)
+//
+//   const inputGrid = gridBuilder(lg, md, sm, xs)
+//   let formGroup
+//
+//   if (type === 'checkbox' || type === 'radio') {
+//     // Label
+//     label = (inputLabels.length && inputLabels[0].props.children) || label
+//
+//     // Help Block
+//     const inputHelp = cloneFirst(inputHelps) || (help) && <InputHelp>{help}</InputHelp>
+//
+//     // Input
+//     // Radio 'name' will get passed as props
+//     const input = <div class={type}><label><input {...props} type={type} id={id}/> {label}{inputHelp}</label></div>
+//
+//     // Input Group
+//     const inputGroup = input
+//
+//     // Horizontal Group (Input Group & Help Block)
+//     const horizontalClass = horizontal ? inputGrid.generateOffset().swapOffset().toClassName(true) : null
+//     const horizontalGroup = horizontalClass
+//       ? <div {...horizontalClass}>{inputGroup}</div>
+//       : <>{inputGroup}</>
+//
+//     // Form Group
+//     formGroup = horizontalGroup
+//   } else {
+//     // Label
+//     const inputLabel = cloneFirst(inputLabels, {id, horizontal, ...inputGrid.value}) || (label && <InputLabel {...{id, horizontal, ...inputGrid.value}}>{label}</InputLabel>)
+//
+//     // Help Block
+//     const inputHelp = cloneFirst(inputHelps) || (help) && <InputHelp>{help}</InputHelp>
+//
+//     // Input
+//     const inputClass = builder(className)
+//       .append('form-control', (type !== 'file'))
+//       .append('input-sm', isTrue(small))
+//       .append('input-lg', isTrue(large))
+//       .toClassName()
+//     let input
+//     switch (type) {
+//       case 'textarea':
+//         input = <textarea {...props} {...inputClass} type={type} id={id} placeholder={placeholder}></textarea>
+//         break;
+//       case 'select':
+//         input = <select {...props} {...inputClass} id={id}>{children}</select>
+//         break;
+//       default:
+//         input = <input {...props} {...inputClass} type={type} id={id} placeholder={placeholder}></input>
+//     }
+//
+//     // Input Group
+//     const inputGroupClass = builder()
+//       .append('input-group', inputGroups.length)
+//       .append('input-group-sm', isTrue(inputGroups.length && small))
+//       .append('input-group-lg', isTrue(inputGroups.length && large))
+//       .toClassName()
+//     const inputGroup = inputGroups.length
+//       ? <div {...inputGroupClass}>
+//           {inputGroups.filter((inputGroup) => !inputGroup.props.right)}
+//           {input}
+//           {inputGroups.filter((inputGroup) => inputGroup.props.right)}
+//         </div>
+//       : input
+//
+//     // If sized and not horizontal
+//     //NOTE: SHUNT
+//     if (inputGrid.hasValue() && !horizontal) return <Col {...inputGrid.value}>{inputGroup}</Col>
+//
+//     // Horizontal Group (Input Group & Help Block)
+//     const horizontalClass = horizontal ? inputGrid.invert().toClassName(true) : null
+//     const horizontalGroup = horizontalClass
+//       ? <div {...horizontalClass}>{inputGroup}{inputHelp}</div>
+//       : <>{inputGroup}{inputHelp}</>
+//
+//     // Form Group
+//     formGroup = <>{inputLabel}{horizontalGroup}</>
+//   }
+//
+//   return (wrapInFormGroup)
+//     ? <FormGroup {...{success, warning, error}} wrapInFormGroup={false}>{formGroup}</FormGroup>
+//     : formGroup
+//
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const InputLabel = ({children, id, horizontal, lg, md, sm, xs, ...props}) => {
   const labelClass = builder('control-label')
     .append(`col-lg-${lg}`, isTrue(horizontal && lg))

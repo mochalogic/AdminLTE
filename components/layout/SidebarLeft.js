@@ -29,32 +29,30 @@ const WidgetSearch = () => (
 const Menu = ({children, menu, ...props}) => {
   const menuTool = (item, index) => <MenuTool {...item} key={index}/>
   const menuItem = (item, index) => (
-    <MenuItem {...item} key={index}>
+    <MenuItem {...item} key={index} {...props}>
       {item.menuItems && item.menuItems.map(menuItem)}
       {item.menuTools && item.menuTools.map(menuTool)}
     </MenuItem>)
 
   return <ul class="sidebar-menu" data-widget="tree">{menu ? menu.menuItems.map(menuItem) : children}</ul>
 }
-const MenuItem = ({children, header = false, selected = false, icon = 'fa-circle-o', title, href, ...props}) => {
+const MenuItem = ({children, header = false, selected = false, icon = 'fa-circle-o', title, href, routeCurrent, ...props}) => {
   if (header) return <li class="header">{title}</li>
 
-  let menuItemClass = [];
-  // let menuItems = [];
-  // let menuTools = [];
-  let menuToolbox = null;
   let menuTree = null;
+
+  children = React.Children.toArray(children);
+  var {match: menuItems = [], children} = matchChild(children, MenuItem)
+  var {match: menuTools = [], children} = matchChild(children, MenuTool)
 
   const selectedChildren = (selected, child) => {
     if (selected) return selected
 
     if (!child || !child.props) return false
 
-    if (Router.router && Router.router.route) {
-      if (Router.router && Router.router.route == child.props.href) return true
-    }
-
     if (child.props.selected) return true
+
+    if (routeCurrent == child.props.href) return true
 
     if (child.props.children) {
       return child.props.children.reduce(selectedChildren, selected)
@@ -63,26 +61,20 @@ const MenuItem = ({children, header = false, selected = false, icon = 'fa-circle
     return false
   }
 
-  children = React.Children.toArray(children);
-  var {match: menuItems = [], children} = matchChild(children, MenuItem)
-  var {match: menuTools = [], children} = matchChild(children, MenuTool)
+  selected = (routeCurrent && (routeCurrent == href)) || menuItems.reduce(selectedChildren, selected)
 
-  selected = (Router.router && Router.router.route == href) || menuItems.reduce(selectedChildren, selected)
+  const menuItemClass = (selected) ? ['active'] : []
 
-  if (selected) menuItemClass.push('active')
-  if (icon) icon = <Icon name={icon}/>
-  title = <span>{title}</span>
-
-  if (menuItems.length > 0) {
+  if (menuItems.length) {
     menuItemClass.push('treeview')
 
     menuTools.push(<i key="expand-caret" class="fa fa-angle-left pull-right"></i>)
     menuTree = <ul class="treeview-menu">{menuItems}</ul>
   }
-  if (menuTools.length > 0) menuToolbox = <span class="pull-right-container">{menuTools.reverse()}</span>
 
-  const menuItem = <a>{icon}{title}{menuToolbox}</a>
-  return <li class={menuItemClass.join(' ')}>{(menuItems.length == 0 && href) ? <Link href={href}>{menuItem}</Link> : menuItem}{menuTree}</li>
+  const menuToolbox = (menuTools.length) ? <span class="pull-right-container">{menuTools.reverse()}</span> : null
+  const menuItem = <a><Icon name={icon}/><span>{title}</span>{menuToolbox}</a>
+  return <li class={menuItemClass.join(' ')}>{(!menuItems.length && href) ? <Link href={href}>{menuItem}</Link> : menuItem}{menuTree}</li>
 }
 const MenuTool = ({children, label = false, value, bg, context}) => {
   if (label) {
@@ -95,13 +87,13 @@ const MenuTool = ({children, label = false, value, bg, context}) => {
 }
 
 const baseUrl = '/demo'
-//, selected: true
+
 const menu = {
   menuItems: [
     {title: 'MAIN NAVIGATION', header: true},
     {title: 'Dashboard', icon: 'fa-dashboard',
       menuItems: [
-        {title: 'Dashboard v1',       href: `${baseUrl}/dashboard`},
+        {title: 'Dashboard v1',       href: `${baseUrl}/dashboard`}, //, selected: true
         {title: 'Dashboard v2',       href: `${baseUrl}/dashboard2`}
       ],
       menuTools: []
@@ -138,7 +130,7 @@ const menu = {
         {title: 'Icons',              href:`${baseUrl}/uiIcons`},
         {title: 'Buttons',            href:`${baseUrl}/uiButtons`},
         {title: 'Sliders',            href:`${baseUrl}/uiSliders`},
-        {title: 'Timeline',            href:`${baseUrl}/uiTimeline`},
+        {title: 'Timeline',           href:`${baseUrl}/uiTimeline`},
         {title: 'Modals',             href:`${baseUrl}/uiModals`}
       ],
       menuTools: []
@@ -229,9 +221,6 @@ const menu = {
   ]
 }
 
-// const menuItemHeader = (title) => ({title, header: true})
-// const menuItem = (title, icon = null, href = null) => ({title, icon, href, menuItems: [], menuTools: []})
-
 const legacyCode = () => {
   'use strict';
 
@@ -264,8 +253,7 @@ const legacyCode = () => {
     expanded : 'expanded.tree'
   };
 
-  // Tree Class Definition
-  // =====================
+  // Tree Class Definition =====================
   var Tree = function (element, options) {
     this.element = element;
     this.options = options;
@@ -324,7 +312,6 @@ const legacyCode = () => {
   };
 
   // Private
-
   Tree.prototype._setUpListeners = function () {
     var that = this;
 
@@ -333,8 +320,7 @@ const legacyCode = () => {
     });
   };
 
-  // Plugin Definition
-  // =================
+  // Plugin Definition =================
   function Plugin(option) {
     return this.each(function () {
       var $this = $(this);
@@ -352,23 +338,16 @@ const legacyCode = () => {
   $.fn.tree             = Plugin;
   $.fn.tree.Constructor = Tree;
 
-  // No Conflict Mode
-  // ================
+  // No Conflict Mode ================
   $.fn.tree.noConflict = function () {
     $.fn.tree = old;
     return this;
   };
 
-  // Tree Data API
-  // =============
+  // Tree Data API =============
   $(Selector.data).each(function () {
     Plugin.call($(this));
   });
-  // $(window).on('load', function () {
-  //   $(Selector.data).each(function () {
-  //     Plugin.call($(this));
-  //   });
-  // });
 }
 
 class SidebarLeft extends React.Component {
@@ -376,102 +355,104 @@ class SidebarLeft extends React.Component {
   tagLine = 'Preview'
   componentDidMount() {
     console.log(`componentDidMount (${this.title})`);
+    this.setState({routeCurrent: (Router && Router.router && Router.router.route)})
     legacyCode();
   }
   componentDidUpdate() {
     console.log(`componentDidUpdate (${this.title})`);
     legacyCode();
   }
-
   render() {
+    const routeCurrent = this.state && this.state.routeCurrent
 
     return (
       <aside class="main-sidebar">
         <section class="sidebar">
           <WidgetUser/>
           <WidgetSearch/>
-          <Menu menu={menu}/>
-          {/*
-          <Menu>
-            <MenuItem header title="MAIN NAVIGATION"/>
-            <MenuItem title="Dashboard" icon="fa-dashboard">
-              <MenuItem title="Dashboard v1" href={`${baseUrl}/dashboard`} selected/>
-              <MenuItem title="Dashboard v2" href={`${baseUrl}/dashboard2`}/>
-            </MenuItem>
-            <MenuItem title="Layout Options" icon="fa-files-o">
-              <MenuItem title="Top Navigation" href={`${baseUrl}/layoutTopNav`}/>
-              <MenuItem title="Boxed" href={`${baseUrl}/layoutBoxed`}/>
-              <MenuItem title="Fixed" href={`${baseUrl}/layoutFixed`}/>
-              <MenuItem title="Collapsed Sidebar" href={`${baseUrl}/layoutCollapsedSidebar`}/>
-              <MenuTool label value="4" context="primary"/>
-            </MenuItem>
-            <MenuItem title="Widgets" href={`${baseUrl}/widgets`} icon="fa-th">
-              <MenuTool label value="new" bg="green"/>
-            </MenuItem>
-            <MenuItem title="Charts" icon="fa-pie-chart">
-              <MenuItem title="ChartJS" href={`${baseUrl}/chartChartJs`}/>
-              <MenuItem title="Morris" href={`${baseUrl}/chartMorris`}/>
-              <MenuItem title="Flot" href={`${baseUrl}/chartFlot`}/>
-              <MenuItem title="Inline charts" href={`${baseUrl}/chartInline`}/>
-            </MenuItem>
-            <MenuItem title="UI Elements" icon="fa-laptop">
-              <MenuItem title="General" href={`${baseUrl}/uiGeneral`}/>
-              <MenuItem title="Icons" href={`${baseUrl}/uiIcons`}/>
-              <MenuItem title="Buttons" href={`${baseUrl}/uiButtons`}/>
-              <MenuItem title="Sliders" href={`${baseUrl}/uiSliders`}/>
-              <MenuItem title="Timeline" href={`${baseUrl}/uiTimeline`}/>
-              <MenuItem title="Modals" href={`${baseUrl}/uiModals`}/>
-            </MenuItem>
-            <MenuItem title="Forms" icon="fa-edit">
-              <MenuItem title="General Elements" href={`${baseUrl}/formsGeneral`}/>
-              <MenuItem title="Advanced Elements" href={`${baseUrl}/formsAdvanced`}/>
-              <MenuItem title="Editors" href={`${baseUrl}/formsEditors`}/>
-            </MenuItem>
-            <MenuItem title="Tables" icon="fa-table">
-              <MenuItem title="Simple tables" href={`${baseUrl}/tableSimple`}/>
-              <MenuItem title="Data tables" href={`${baseUrl}/tableData`}/>
-            </MenuItem>
-            <MenuItem title="Calendar" href={`${baseUrl}/calendar`} icon="fa-calendar">
-              <MenuTool label value="17" bg="blue"/>
-              <MenuTool label value="3" bg="red"/>
-            </MenuItem>
-            <MenuItem title="Mailbox" href={`${baseUrl}/mailbox`} icon="fa-envelope">
-              <MenuTool label value="5" bg="red"/>
-              <MenuTool label value="16" bg="green"/>
-              <MenuTool label value="12" bg="yellow"/>
-            </MenuItem>
-            <MenuItem title="Examples" href={`${baseUrl}/asdf`} icon="fa-folder">
-              <MenuItem title="Invoice" href={`${baseUrl}/exampleInvoice`}/>
-              <MenuItem title="Profile" href={`${baseUrl}/exampleProfile`}/>
-              <MenuItem title="Login" href={`${baseUrl}/exampleLogin`}/>
-              <MenuItem title="Register" href={`${baseUrl}/exampleRegister`}/>
-              <MenuItem title="Lockscreen" href={`${baseUrl}/exampleLockscreen`}/>
-              <MenuItem title="404 Error" href={`${baseUrl}/example404`}/>
-              <MenuItem title="500 Error" href={`${baseUrl}/example500`}/>
-              <MenuItem title="Blank Page" href={`${baseUrl}/exampleBlank`}/>
-              <MenuItem title="Pace Page" href={`${baseUrl}/examplePace`}/>
-            </MenuItem>
-            <MenuItem title="Multilevel" icon="fa-share">
-              <MenuItem title="Level One"/>
-              <MenuItem title="Level One">
-                <MenuItem title="Level Two"/>
-                <MenuItem title="Level Two">
-                  <MenuItem title="Level Three"/>
-                  <MenuItem title="Level Three"/>
-                </MenuItem>
-              </MenuItem>
-              <MenuItem title="Level One"/>
-            </MenuItem>
-            <MenuItem title="Documentation" href="https://adminlte.io/docs" icon="fa-book"></MenuItem>
-            <MenuItem header title="LABELS"/>
-            <MenuItem title="Important" icon="fa-circle-o text-red"></MenuItem>
-            <MenuItem title="Warning" icon="fa-circle-o text-yellow"></MenuItem>
-            <MenuItem title="Information" icon="fa-circle-o text-aqua"></MenuItem>
-          </Menu>
-          */}
+          <Menu menu={menu} routeCurrent={routeCurrent}/>
         </section>
       </aside>)
   }
 }
 
 export default SidebarLeft
+
+{/*
+<Menu>
+  <MenuItem header title="MAIN NAVIGATION"/>
+  <MenuItem title="Dashboard" icon="fa-dashboard">
+    <MenuItem title="Dashboard v1" href={`${baseUrl}/dashboard`} selected/>
+    <MenuItem title="Dashboard v2" href={`${baseUrl}/dashboard2`}/>
+  </MenuItem>
+  <MenuItem title="Layout Options" icon="fa-files-o">
+    <MenuItem title="Top Navigation" href={`${baseUrl}/layoutTopNav`}/>
+    <MenuItem title="Boxed" href={`${baseUrl}/layoutBoxed`}/>
+    <MenuItem title="Fixed" href={`${baseUrl}/layoutFixed`}/>
+    <MenuItem title="Collapsed Sidebar" href={`${baseUrl}/layoutCollapsedSidebar`}/>
+    <MenuTool label value="4" context="primary"/>
+  </MenuItem>
+  <MenuItem title="Widgets" href={`${baseUrl}/widgets`} icon="fa-th">
+    <MenuTool label value="new" bg="green"/>
+  </MenuItem>
+  <MenuItem title="Charts" icon="fa-pie-chart">
+    <MenuItem title="ChartJS" href={`${baseUrl}/chartChartJs`}/>
+    <MenuItem title="Morris" href={`${baseUrl}/chartMorris`}/>
+    <MenuItem title="Flot" href={`${baseUrl}/chartFlot`}/>
+    <MenuItem title="Inline charts" href={`${baseUrl}/chartInline`}/>
+  </MenuItem>
+  <MenuItem title="UI Elements" icon="fa-laptop">
+    <MenuItem title="General" href={`${baseUrl}/uiGeneral`}/>
+    <MenuItem title="Icons" href={`${baseUrl}/uiIcons`}/>
+    <MenuItem title="Buttons" href={`${baseUrl}/uiButtons`}/>
+    <MenuItem title="Sliders" href={`${baseUrl}/uiSliders`}/>
+    <MenuItem title="Timeline" href={`${baseUrl}/uiTimeline`}/>
+    <MenuItem title="Modals" href={`${baseUrl}/uiModals`}/>
+  </MenuItem>
+  <MenuItem title="Forms" icon="fa-edit">
+    <MenuItem title="General Elements" href={`${baseUrl}/formsGeneral`}/>
+    <MenuItem title="Advanced Elements" href={`${baseUrl}/formsAdvanced`}/>
+    <MenuItem title="Editors" href={`${baseUrl}/formsEditors`}/>
+  </MenuItem>
+  <MenuItem title="Tables" icon="fa-table">
+    <MenuItem title="Simple tables" href={`${baseUrl}/tableSimple`}/>
+    <MenuItem title="Data tables" href={`${baseUrl}/tableData`}/>
+  </MenuItem>
+  <MenuItem title="Calendar" href={`${baseUrl}/calendar`} icon="fa-calendar">
+    <MenuTool label value="17" bg="blue"/>
+    <MenuTool label value="3" bg="red"/>
+  </MenuItem>
+  <MenuItem title="Mailbox" href={`${baseUrl}/mailbox`} icon="fa-envelope">
+    <MenuTool label value="5" bg="red"/>
+    <MenuTool label value="16" bg="green"/>
+    <MenuTool label value="12" bg="yellow"/>
+  </MenuItem>
+  <MenuItem title="Examples" href={`${baseUrl}/asdf`} icon="fa-folder">
+    <MenuItem title="Invoice" href={`${baseUrl}/exampleInvoice`}/>
+    <MenuItem title="Profile" href={`${baseUrl}/exampleProfile`}/>
+    <MenuItem title="Login" href={`${baseUrl}/exampleLogin`}/>
+    <MenuItem title="Register" href={`${baseUrl}/exampleRegister`}/>
+    <MenuItem title="Lockscreen" href={`${baseUrl}/exampleLockscreen`}/>
+    <MenuItem title="404 Error" href={`${baseUrl}/example404`}/>
+    <MenuItem title="500 Error" href={`${baseUrl}/example500`}/>
+    <MenuItem title="Blank Page" href={`${baseUrl}/exampleBlank`}/>
+    <MenuItem title="Pace Page" href={`${baseUrl}/examplePace`}/>
+  </MenuItem>
+  <MenuItem title="Multilevel" icon="fa-share">
+    <MenuItem title="Level One"/>
+    <MenuItem title="Level One">
+      <MenuItem title="Level Two"/>
+      <MenuItem title="Level Two">
+        <MenuItem title="Level Three"/>
+        <MenuItem title="Level Three"/>
+      </MenuItem>
+    </MenuItem>
+    <MenuItem title="Level One"/>
+  </MenuItem>
+  <MenuItem title="Documentation" href="https://adminlte.io/docs" icon="fa-book"></MenuItem>
+  <MenuItem header title="LABELS"/>
+  <MenuItem title="Important" icon="fa-circle-o text-red"></MenuItem>
+  <MenuItem title="Warning" icon="fa-circle-o text-yellow"></MenuItem>
+  <MenuItem title="Information" icon="fa-circle-o text-aqua"></MenuItem>
+</Menu>
+*/}

@@ -1,4 +1,6 @@
 import React, {Component} from 'react'
+import {findDOMNode} from 'react-dom'
+// import $ from 'jquery'
 import Layout from '../../components/layout/Layout.js'
 import Link from 'next/link'
 import fetch from 'isomorphic-unfetch'
@@ -165,13 +167,13 @@ const ColorAndTimePickers_ = ({children, ...props }) => {
     </div>
   )
 }
-const ColorAndTimePickers = ({children, ...props }) =>
+const ColorAndTimePickers = ({children, caller, ...props }) =>
   <Box context="info" collapsable removable>
     <BoxHeader title="Color & Time Picker"/>
     <BoxBody>
-      <Input type="text" label="Color picker:" class="my-colorpicker1"/>
-      <Input type="text" label="Color picker with addon:" class="my-colorpicker2">
-        <InputAddon right><i></i></InputAddon>
+      <Input type="colorpicker" label="Magic Color picker:"/>
+      <Input type="text" label="Magic Color picker with addon:" class="my-colorpicker1">
+        <InputAddon right colorpicker><i></i></InputAddon>
       </Input>
 
       <div class="form-group">
@@ -193,6 +195,9 @@ const ColorAndTimePickers = ({children, ...props }) =>
         </Input>
       </div>
 
+      <div>
+        TODO: Update Colorpicker <a href="https://casesandberg.github.io/react-color/">React Colorpicker</a>
+      </div>
     </BoxBody>
   </Box>
 const DatePickers_ = ({children, ...props }) => {
@@ -470,102 +475,118 @@ const IChecks = ({children, ...props }) =>
 //   )
 // }
 
-const legacyCode = () => {
-  //Initialize Select2 Elements
-  $('.select2').select2()
-
-  //Datemask dd/mm/yyyy
-  $('#datemask').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
-  //Datemask2 mm/dd/yyyy
-  $('#datemask2').inputmask('mm/dd/yyyy', { 'placeholder': 'mm/dd/yyyy' })
-  //Money Euro
-  $('[data-mask]').inputmask()
-
-  //Date range picker
-  $('#reservation').daterangepicker()
-  //Date range picker with time picker
-  $('#reservationtime').daterangepicker({ timePicker: true, timePickerIncrement: 30, format: 'MM/DD/YYYY h:mm A' })
-  //Date range as a button
-  $('#daterange-btn').daterangepicker(
-    {
-      ranges   : {
-        'Today'       : [moment(), moment()],
-        'Yesterday'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-        'Last 7 Days' : [moment().subtract(6, 'days'), moment()],
-        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-        'This Month'  : [moment().startOf('month'), moment().endOf('month')],
-        'Last Month'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-      },
-      startDate: moment().subtract(29, 'days'),
-      endDate  : moment()
-    },
-    function (start, end) {
-      $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
-    }
-  )
-
-  //Date picker
-  $('#datepicker').datepicker({
-    autoclose: true
-  })
-
-  //iCheck for checkbox and radio inputs
-  $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
-    checkboxClass: 'icheckbox_minimal-blue',
-    radioClass   : 'iradio_minimal-blue'
-  })
-  //Red color scheme for iCheck
-  $('input[type="checkbox"].minimal-red, input[type="radio"].minimal-red').iCheck({
-    checkboxClass: 'icheckbox_minimal-red',
-    radioClass   : 'iradio_minimal-red'
-  })
-  //Flat red color scheme for iCheck
-  $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
-    checkboxClass: 'icheckbox_flat-green',
-    radioClass   : 'iradio_flat-green'
-  })
-
-  //Colorpicker
-  $('.my-colorpicker1').colorpicker()
-  //color picker with addon
-  $('.my-colorpicker2').colorpicker()
-
-  //Timepicker
-  $('.timepicker').timepicker({
-    showInputs: false
-  })
-}
 
 class Page extends Component {
   title = 'Advanced Form Elements'
   tagLine = 'Preview'
+  colorpickers = []
+  constructor() {
+    super()
+    this.colorpickerAttach = this.colorpickerAttach.bind(this)
+  }
+  colorpickerAttach(el) {
+    this.colorpickers.push(el)
+  }
   componentDidMount()  {
     console.log(`componentDidMount (${this.title})`)
-    legacyCode()
+    this.legacyCode()
+
+    this.colorpickers.forEach(colorpicker => $(findDOMNode(colorpicker)).colorpicker())
   }
   componentDidUpdate() {
     console.log(`componentDidUpdate (${this.title})`)
-    legacyCode()
+    this.legacyCode()
   }
+  legacyCode() {
+    //Initialize Select2 Elements
+    $('.select2').select2()
+
+    //Datemask dd/mm/yyyy
+    $('#datemask').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
+    //Datemask2 mm/dd/yyyy
+    $('#datemask2').inputmask('mm/dd/yyyy', { 'placeholder': 'mm/dd/yyyy' })
+    //Money Euro
+    $('[data-mask]').inputmask()
+
+    //Date range picker
+    $('#reservation').daterangepicker()
+    //Date range picker with time picker
+    $('#reservationtime').daterangepicker({ timePicker: true, timePickerIncrement: 30, format: 'MM/DD/YYYY h:mm A' })
+    //Date range as a button
+    $('#daterange-btn').daterangepicker(
+      {
+        ranges   : {
+          'Today'       : [moment(), moment()],
+          'Yesterday'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+          'Last 7 Days' : [moment().subtract(6, 'days'), moment()],
+          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+          'This Month'  : [moment().startOf('month'), moment().endOf('month')],
+          'Last Month'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        startDate: moment().subtract(29, 'days'),
+        endDate  : moment()
+      },
+      function (start, end) {
+        $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+      }
+    )
+
+    //Date picker
+    $('#datepicker').datepicker({
+      autoclose: true
+    })
+
+    //iCheck for checkbox and radio inputs
+    $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
+      checkboxClass: 'icheckbox_minimal-blue',
+      radioClass   : 'iradio_minimal-blue'
+    })
+    //Red color scheme for iCheck
+    $('input[type="checkbox"].minimal-red, input[type="radio"].minimal-red').iCheck({
+      checkboxClass: 'icheckbox_minimal-red',
+      radioClass   : 'iradio_minimal-red'
+    })
+    //Flat red color scheme for iCheck
+    $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+      checkboxClass: 'icheckbox_flat-green',
+      radioClass   : 'iradio_flat-green'
+    })
+
+    // //Colorpicker
+    // $('.my-colorpicker1').colorpicker()
+    // //color picker with addon
+    // $('.my-colorpicker2').colorpicker()
+
+    //Timepicker
+    $('.timepicker').timepicker({
+      showInputs: false
+    })
+  }
+
   render() {
     return (
       <Layout title={this.title} tagLine={this.tagLine}>
         <Row>
           <Col md="6">
             <Row>
-              <ColorAndTimePickers/>
+              <ColorAndTimePickers caller={this}/>
+              {/*
               <DatePickers/>
               <IChecks/>
+               */}
             </Row>
           </Col>
           <Col md="6">
+            {/*
             <ColorAndTimePickers_/>
             <DatePickers_/>
             <IChecks_/>
+             */}
           </Col>
         </Row>
 
         {/* WIP Above */}
+        {/*
         <Row>
           <Select2/>
         </Row>
@@ -573,7 +594,7 @@ class Page extends Component {
           <Col md="6">
             <Row>
               <InputMasks/>
-              <ColorAndTimePickers/>
+              <colorAndTimePickers/>
             </Row>
           </Col>
           <Col md="6">
@@ -583,6 +604,7 @@ class Page extends Component {
             </Row>
           </Col>
         </Row>
+         */}
       </Layout>
     )
   }
