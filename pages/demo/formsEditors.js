@@ -4,22 +4,65 @@ import Link from 'next/link'
 import fetch from 'isomorphic-unfetch'
 
 import {
+  typeMatch, matchChild, builder,
+
   Row,
   Col,
+
+  Icon,
+
   Box,
   BoxHeader,
+  BoxTool,
   BoxBody,
+  BoxProgress,
   BoxFooter,
-  Percentage
+
+  Percentage,
+  Image,
+  Badge,
+
+  imgRoot
 } from '../../components'
 
+import {
+  isArray,
+  isTrue,
+  isDefined,
+  isNull,
+  isNaN,
+  isEmpty,
+  cloneFirst,
+  FormGroup,
+  gridBuilder,
+  Input,
+  InputLabel,
+  InputHelp,
+  InputAddon,
+  InputButton,
+  Button,
+  Form,
+  H
+} from '../../components/base/Form'
 
-const Page = (props) => (
-  <Layout title="Blank" tagLine="TagLine">
-    <Row>
-      <Col>Blank Page</Col>
-    </Row>
-  </Layout>
-)
+
+class Page extends Component {
+  title = 'Text Editors'
+  tagLine = 'Advanced form element'
+  componentDidMount()  { console.log(`componentDidMount (${this.title})`) }
+  componentDidUpdate() { console.log(`componentDidUpdate (${this.title})`) }
+  render() {
+    return (
+      <Layout title={this.title} tagLine={this.tagLine}>
+        <Row>
+          <Row md="6">
+          </Row>
+          <Row md="6">
+          </Row>
+        </Row>
+      </Layout>
+    )
+  }
+}
 
 export default Page

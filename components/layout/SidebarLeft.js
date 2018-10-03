@@ -1,6 +1,7 @@
-import React from 'react'
+import React, {Component} from 'react'
 import Link from 'next/link'
-import {Icon, typeMatch} from '../'
+import Router from 'next/router'
+import {Icon, typeMatch, matchChild} from '../'
 
 const WidgetUser = () => (
   <div class="user-panel">
@@ -25,7 +26,7 @@ const WidgetSearch = () => (
   </form>
 )
 
-const Menu = ({children, menu}) => {
+const Menu = ({children, menu, ...props}) => {
   const menuTool = (item, index) => <MenuTool {...item} key={index}/>
   const menuItem = (item, index) => (
     <MenuItem {...item} key={index}>
@@ -35,38 +36,38 @@ const Menu = ({children, menu}) => {
 
   return <ul class="sidebar-menu" data-widget="tree">{menu ? menu.menuItems.map(menuItem) : children}</ul>
 }
-const MenuItem = ({children, header = false, selected = false, icon = 'fa-circle-o', title, href}) => {
+const MenuItem = ({children, header = false, selected = false, icon = 'fa-circle-o', title, href, ...props}) => {
   if (header) return <li class="header">{title}</li>
 
   let menuItemClass = [];
-  let menuItems = [];
-  let menuTools = [];
+  // let menuItems = [];
+  // let menuTools = [];
   let menuToolbox = null;
   let menuTree = null;
 
-  const selectedChildren = (selected, child) => selected
-    || (child
-      && child.props
-      && (child.props.selected
-        || (child.props.children
-          && child.props.children.reduce(selectedChildren, selected))
-      )
-    )
+  const selectedChildren = (selected, child) => {
+    if (selected) return selected
 
-  React.Children.forEach(
-    children,
-    (child) => {
-      switch (true) {
-        case typeMatch(child, MenuItem):
-          menuItems.push(child);
-          selected = selectedChildren(selected, child)
-          break;
-        case typeMatch(child, MenuTool):
-          menuTools.push(child);
-          break;
-      }
+    if (!child || !child.props) return false
+
+    if (Router.router && Router.router.route) {
+      if (Router.router && Router.router.route == child.props.href) return true
     }
-  )
+
+    if (child.props.selected) return true
+
+    if (child.props.children) {
+      return child.props.children.reduce(selectedChildren, selected)
+    }
+
+    return false
+  }
+
+  children = React.Children.toArray(children);
+  var {match: menuItems = [], children} = matchChild(children, MenuItem)
+  var {match: menuTools = [], children} = matchChild(children, MenuTool)
+
+  selected = (Router.router && Router.router.route == href) || menuItems.reduce(selectedChildren, selected)
 
   if (selected) menuItemClass.push('active')
   if (icon) icon = <Icon name={icon}/>
@@ -94,12 +95,13 @@ const MenuTool = ({children, label = false, value, bg, context}) => {
 }
 
 const baseUrl = '/demo'
+//, selected: true
 const menu = {
   menuItems: [
     {title: 'MAIN NAVIGATION', header: true},
     {title: 'Dashboard', icon: 'fa-dashboard',
       menuItems: [
-        {title: 'Dashboard v1',       href: `${baseUrl}/dashboard`, selected: true},
+        {title: 'Dashboard v1',       href: `${baseUrl}/dashboard`},
         {title: 'Dashboard v2',       href: `${baseUrl}/dashboard2`}
       ],
       menuTools: []
@@ -230,92 +232,246 @@ const menu = {
 // const menuItemHeader = (title) => ({title, header: true})
 // const menuItem = (title, icon = null, href = null) => ({title, icon, href, menuItems: [], menuTools: []})
 
-const SidebarLeft = () => (
-  <aside class="main-sidebar">
-    <section class="sidebar">
-      <WidgetUser/>
-      <WidgetSearch/>
-      <Menu menu={menu}/>
-      {/*
-      <Menu>
-        <MenuItem header title="MAIN NAVIGATION"/>
-        <MenuItem title="Dashboard" icon="fa-dashboard">
-          <MenuItem title="Dashboard v1" href={`${baseUrl}/dashboard`} selected/>
-          <MenuItem title="Dashboard v2" href={`${baseUrl}/dashboard2`}/>
-        </MenuItem>
-        <MenuItem title="Layout Options" icon="fa-files-o">
-          <MenuItem title="Top Navigation" href={`${baseUrl}/layoutTopNav`}/>
-          <MenuItem title="Boxed" href={`${baseUrl}/layoutBoxed`}/>
-          <MenuItem title="Fixed" href={`${baseUrl}/layoutFixed`}/>
-          <MenuItem title="Collapsed Sidebar" href={`${baseUrl}/layoutCollapsedSidebar`}/>
-          <MenuTool label value="4" context="primary"/>
-        </MenuItem>
-        <MenuItem title="Widgets" href={`${baseUrl}/widgets`} icon="fa-th">
-          <MenuTool label value="new" bg="green"/>
-        </MenuItem>
-        <MenuItem title="Charts" icon="fa-pie-chart">
-          <MenuItem title="ChartJS" href={`${baseUrl}/chartChartJs`}/>
-          <MenuItem title="Morris" href={`${baseUrl}/chartMorris`}/>
-          <MenuItem title="Flot" href={`${baseUrl}/chartFlot`}/>
-          <MenuItem title="Inline charts" href={`${baseUrl}/chartInline`}/>
-        </MenuItem>
-        <MenuItem title="UI Elements" icon="fa-laptop">
-          <MenuItem title="General" href={`${baseUrl}/uiGeneral`}/>
-          <MenuItem title="Icons" href={`${baseUrl}/uiIcons`}/>
-          <MenuItem title="Buttons" href={`${baseUrl}/uiButtons`}/>
-          <MenuItem title="Sliders" href={`${baseUrl}/uiSliders`}/>
-          <MenuItem title="Timeline" href={`${baseUrl}/uiTimeline`}/>
-          <MenuItem title="Modals" href={`${baseUrl}/uiModals`}/>
-        </MenuItem>
-        <MenuItem title="Forms" icon="fa-edit">
-          <MenuItem title="General Elements" href={`${baseUrl}/formsGeneral`}/>
-          <MenuItem title="Advanced Elements" href={`${baseUrl}/formsAdvanced`}/>
-          <MenuItem title="Editors" href={`${baseUrl}/formsEditors`}/>
-        </MenuItem>
-        <MenuItem title="Tables" icon="fa-table">
-          <MenuItem title="Simple tables" href={`${baseUrl}/tableSimple`}/>
-          <MenuItem title="Data tables" href={`${baseUrl}/tableData`}/>
-        </MenuItem>
-        <MenuItem title="Calendar" href={`${baseUrl}/calendar`} icon="fa-calendar">
-          <MenuTool label value="17" bg="blue"/>
-          <MenuTool label value="3" bg="red"/>
-        </MenuItem>
-        <MenuItem title="Mailbox" href={`${baseUrl}/mailbox`} icon="fa-envelope">
-          <MenuTool label value="5" bg="red"/>
-          <MenuTool label value="16" bg="green"/>
-          <MenuTool label value="12" bg="yellow"/>
-        </MenuItem>
-        <MenuItem title="Examples" href={`${baseUrl}/asdf`} icon="fa-folder">
-          <MenuItem title="Invoice" href={`${baseUrl}/exampleInvoice`}/>
-          <MenuItem title="Profile" href={`${baseUrl}/exampleProfile`}/>
-          <MenuItem title="Login" href={`${baseUrl}/exampleLogin`}/>
-          <MenuItem title="Register" href={`${baseUrl}/exampleRegister`}/>
-          <MenuItem title="Lockscreen" href={`${baseUrl}/exampleLockscreen`}/>
-          <MenuItem title="404 Error" href={`${baseUrl}/example404`}/>
-          <MenuItem title="500 Error" href={`${baseUrl}/example500`}/>
-          <MenuItem title="Blank Page" href={`${baseUrl}/exampleBlank`}/>
-          <MenuItem title="Pace Page" href={`${baseUrl}/examplePace`}/>
-        </MenuItem>
-        <MenuItem title="Multilevel" icon="fa-share">
-          <MenuItem title="Level One"/>
-          <MenuItem title="Level One">
-            <MenuItem title="Level Two"/>
-            <MenuItem title="Level Two">
-              <MenuItem title="Level Three"/>
-              <MenuItem title="Level Three"/>
+const legacyCode = () => {
+  'use strict';
+
+  var DataKey = 'lte.tree';
+
+  var Default = {
+    animationSpeed: 500,
+    accordion     : true,
+    followLink    : false,
+    trigger       : '.treeview a'
+  };
+
+  var Selector = {
+    tree        : '.tree',
+    treeview    : '.treeview',
+    treeviewMenu: '.treeview-menu',
+    open        : '.menu-open, .active',
+    li          : 'li',
+    data        : '[data-widget="tree"]',
+    active      : '.active'
+  };
+
+  var ClassName = {
+    open: 'menu-open',
+    tree: 'tree'
+  };
+
+  var Event = {
+    collapsed: 'collapsed.tree',
+    expanded : 'expanded.tree'
+  };
+
+  // Tree Class Definition
+  // =====================
+  var Tree = function (element, options) {
+    this.element = element;
+    this.options = options;
+
+    $(this.element).addClass(ClassName.tree);
+
+    $(Selector.treeview + Selector.active, this.element).addClass(ClassName.open);
+
+    this._setUpListeners();
+  };
+
+  Tree.prototype.toggle = function (link, event) {
+    var treeviewMenu = link.next(Selector.treeviewMenu);
+    var parentLi     = link.parent();
+    var isOpen       = parentLi.hasClass(ClassName.open);
+
+    if (!parentLi.is(Selector.treeview)) {
+      return;
+    }
+
+    if (!this.options.followLink || link.attr('href') === '#') {
+      event.preventDefault();
+    }
+
+    if (isOpen) {
+      this.collapse(treeviewMenu, parentLi);
+    } else {
+      this.expand(treeviewMenu, parentLi);
+    }
+  };
+
+  Tree.prototype.expand = function (tree, parent) {
+    var expandedEvent = $.Event(Event.expanded);
+
+    if (this.options.accordion) {
+      var openMenuLi = parent.siblings(Selector.open);
+      var openTree   = openMenuLi.children(Selector.treeviewMenu);
+      this.collapse(openTree, openMenuLi);
+    }
+
+    parent.addClass(ClassName.open);
+    tree.slideDown(this.options.animationSpeed, function () {
+      $(this.element).trigger(expandedEvent);
+    }.bind(this));
+  };
+
+  Tree.prototype.collapse = function (tree, parentLi) {
+    var collapsedEvent = $.Event(Event.collapsed);
+
+    tree.find(Selector.open).removeClass(ClassName.open);
+    parentLi.removeClass(ClassName.open);
+    tree.slideUp(this.options.animationSpeed, function () {
+      tree.find(Selector.open + ' > ' + Selector.treeview).slideUp();
+      $(this.element).trigger(collapsedEvent);
+    }.bind(this));
+  };
+
+  // Private
+
+  Tree.prototype._setUpListeners = function () {
+    var that = this;
+
+    $(this.element).on('click', this.options.trigger, function (event) {
+      that.toggle($(this), event);
+    });
+  };
+
+  // Plugin Definition
+  // =================
+  function Plugin(option) {
+    return this.each(function () {
+      var $this = $(this);
+      var data  = $this.data(DataKey);
+
+      if (!data) {
+        var options = $.extend({}, Default, $this.data(), typeof option == 'object' && option);
+        $this.data(DataKey, new Tree($this, options));
+      }
+    });
+  }
+
+  var old = $.fn.tree;
+
+  $.fn.tree             = Plugin;
+  $.fn.tree.Constructor = Tree;
+
+  // No Conflict Mode
+  // ================
+  $.fn.tree.noConflict = function () {
+    $.fn.tree = old;
+    return this;
+  };
+
+  // Tree Data API
+  // =============
+  $(Selector.data).each(function () {
+    Plugin.call($(this));
+  });
+  // $(window).on('load', function () {
+  //   $(Selector.data).each(function () {
+  //     Plugin.call($(this));
+  //   });
+  // });
+}
+
+class SidebarLeft extends React.Component {
+  title = 'SidebarLeft'
+  tagLine = 'Preview'
+  componentDidMount() {
+    console.log(`componentDidMount (${this.title})`);
+    legacyCode();
+  }
+  componentDidUpdate() {
+    console.log(`componentDidUpdate (${this.title})`);
+    legacyCode();
+  }
+
+  render() {
+
+    return (
+      <aside class="main-sidebar">
+        <section class="sidebar">
+          <WidgetUser/>
+          <WidgetSearch/>
+          <Menu menu={menu}/>
+          {/*
+          <Menu>
+            <MenuItem header title="MAIN NAVIGATION"/>
+            <MenuItem title="Dashboard" icon="fa-dashboard">
+              <MenuItem title="Dashboard v1" href={`${baseUrl}/dashboard`} selected/>
+              <MenuItem title="Dashboard v2" href={`${baseUrl}/dashboard2`}/>
             </MenuItem>
-          </MenuItem>
-          <MenuItem title="Level One"/>
-        </MenuItem>
-        <MenuItem title="Documentation" href="https://adminlte.io/docs" icon="fa-book"></MenuItem>
-        <MenuItem header title="LABELS"/>
-        <MenuItem title="Important" icon="fa-circle-o text-red"></MenuItem>
-        <MenuItem title="Warning" icon="fa-circle-o text-yellow"></MenuItem>
-        <MenuItem title="Information" icon="fa-circle-o text-aqua"></MenuItem>
-      </Menu>
-      */}
-    </section>
-  </aside>
-)
+            <MenuItem title="Layout Options" icon="fa-files-o">
+              <MenuItem title="Top Navigation" href={`${baseUrl}/layoutTopNav`}/>
+              <MenuItem title="Boxed" href={`${baseUrl}/layoutBoxed`}/>
+              <MenuItem title="Fixed" href={`${baseUrl}/layoutFixed`}/>
+              <MenuItem title="Collapsed Sidebar" href={`${baseUrl}/layoutCollapsedSidebar`}/>
+              <MenuTool label value="4" context="primary"/>
+            </MenuItem>
+            <MenuItem title="Widgets" href={`${baseUrl}/widgets`} icon="fa-th">
+              <MenuTool label value="new" bg="green"/>
+            </MenuItem>
+            <MenuItem title="Charts" icon="fa-pie-chart">
+              <MenuItem title="ChartJS" href={`${baseUrl}/chartChartJs`}/>
+              <MenuItem title="Morris" href={`${baseUrl}/chartMorris`}/>
+              <MenuItem title="Flot" href={`${baseUrl}/chartFlot`}/>
+              <MenuItem title="Inline charts" href={`${baseUrl}/chartInline`}/>
+            </MenuItem>
+            <MenuItem title="UI Elements" icon="fa-laptop">
+              <MenuItem title="General" href={`${baseUrl}/uiGeneral`}/>
+              <MenuItem title="Icons" href={`${baseUrl}/uiIcons`}/>
+              <MenuItem title="Buttons" href={`${baseUrl}/uiButtons`}/>
+              <MenuItem title="Sliders" href={`${baseUrl}/uiSliders`}/>
+              <MenuItem title="Timeline" href={`${baseUrl}/uiTimeline`}/>
+              <MenuItem title="Modals" href={`${baseUrl}/uiModals`}/>
+            </MenuItem>
+            <MenuItem title="Forms" icon="fa-edit">
+              <MenuItem title="General Elements" href={`${baseUrl}/formsGeneral`}/>
+              <MenuItem title="Advanced Elements" href={`${baseUrl}/formsAdvanced`}/>
+              <MenuItem title="Editors" href={`${baseUrl}/formsEditors`}/>
+            </MenuItem>
+            <MenuItem title="Tables" icon="fa-table">
+              <MenuItem title="Simple tables" href={`${baseUrl}/tableSimple`}/>
+              <MenuItem title="Data tables" href={`${baseUrl}/tableData`}/>
+            </MenuItem>
+            <MenuItem title="Calendar" href={`${baseUrl}/calendar`} icon="fa-calendar">
+              <MenuTool label value="17" bg="blue"/>
+              <MenuTool label value="3" bg="red"/>
+            </MenuItem>
+            <MenuItem title="Mailbox" href={`${baseUrl}/mailbox`} icon="fa-envelope">
+              <MenuTool label value="5" bg="red"/>
+              <MenuTool label value="16" bg="green"/>
+              <MenuTool label value="12" bg="yellow"/>
+            </MenuItem>
+            <MenuItem title="Examples" href={`${baseUrl}/asdf`} icon="fa-folder">
+              <MenuItem title="Invoice" href={`${baseUrl}/exampleInvoice`}/>
+              <MenuItem title="Profile" href={`${baseUrl}/exampleProfile`}/>
+              <MenuItem title="Login" href={`${baseUrl}/exampleLogin`}/>
+              <MenuItem title="Register" href={`${baseUrl}/exampleRegister`}/>
+              <MenuItem title="Lockscreen" href={`${baseUrl}/exampleLockscreen`}/>
+              <MenuItem title="404 Error" href={`${baseUrl}/example404`}/>
+              <MenuItem title="500 Error" href={`${baseUrl}/example500`}/>
+              <MenuItem title="Blank Page" href={`${baseUrl}/exampleBlank`}/>
+              <MenuItem title="Pace Page" href={`${baseUrl}/examplePace`}/>
+            </MenuItem>
+            <MenuItem title="Multilevel" icon="fa-share">
+              <MenuItem title="Level One"/>
+              <MenuItem title="Level One">
+                <MenuItem title="Level Two"/>
+                <MenuItem title="Level Two">
+                  <MenuItem title="Level Three"/>
+                  <MenuItem title="Level Three"/>
+                </MenuItem>
+              </MenuItem>
+              <MenuItem title="Level One"/>
+            </MenuItem>
+            <MenuItem title="Documentation" href="https://adminlte.io/docs" icon="fa-book"></MenuItem>
+            <MenuItem header title="LABELS"/>
+            <MenuItem title="Important" icon="fa-circle-o text-red"></MenuItem>
+            <MenuItem title="Warning" icon="fa-circle-o text-yellow"></MenuItem>
+            <MenuItem title="Information" icon="fa-circle-o text-aqua"></MenuItem>
+          </Menu>
+          */}
+        </section>
+      </aside>)
+  }
+}
 
 export default SidebarLeft

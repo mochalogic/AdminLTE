@@ -12,6 +12,15 @@ import withNProgress from "next-nprogress";
 import NProgressStyles from "next-nprogress/styles";
 
 class Layout extends React.Component {
+  componentDidMount()  {
+    this.legacyCode()
+  }
+  componentDidUpdate() {
+    this.legacyCode()
+  }
+  legacyCode() {
+    $.widget.bridge('uibutton', $.ui.button);
+  }
   render() {
     const title = this.props.title
     const tagLine = this.props.tagLine
@@ -23,13 +32,23 @@ class Layout extends React.Component {
         <link rel="stylesheet" href="/adminlte/bower_components/bootstrap/dist/css/bootstrap.min.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/font-awesome/css/font-awesome.min.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/Ionicons/css/ionicons.min.css"/>
-        <link rel="stylesheet" href="/adminlte/dist/css/AdminLTE.min.css"/>
-        <link rel="stylesheet" href="/adminlte/dist/css/skins/_all-skins.min.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/morris.js/morris.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/jvectormap/jquery-jvectormap.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/bootstrap-daterangepicker/daterangepicker.css"/>
         <link rel="stylesheet" href="/adminlte/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css"/>
+
+        {/* Form -> Advanced */}
+        <link rel="stylesheet" href="/adminlte/plugins/iCheck/all.css"/>
+        <link rel="stylesheet" href="/adminlte/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css"/>
+        <link rel="stylesheet" href="/adminlte/plugins/timepicker/bootstrap-timepicker.min.css"/>
+        {/* <link rel="stylesheet" href="/adminlte/bower_components/select2/dist/css/select2.min.css"/> */}
+        <link rel="stylesheet" href="/adminlte/node_modules/select2/dist/css/select2.min.css"/>
+        {/* Form -> Advanced */}
+
+        <link rel="stylesheet" href="/adminlte/dist/css/AdminLTE.min.css"/>
+        <link rel="stylesheet" href="/adminlte/dist/css/skins/_all-skins.min.css"/>
+
         {/* <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -38,12 +57,13 @@ class Layout extends React.Component {
         <![endif]--> */}
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic"/>
       </>)
+
     const AdminLteFoot = (
       <>
         <script src="/adminlte/bower_components/jquery/dist/jquery.min.js"></script>
         <script src="/adminlte/bower_components/jquery-ui/jquery-ui.min.js"></script>
         {/* <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip --> */}
-        <script>$.widget.bridge('uibutton', $.ui.button);</script>
+        {/* <script>$.widget.bridge('uibutton', $.ui.button);</script> */}
         <script src="/adminlte/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
         <script src="/adminlte/bower_components/raphael/raphael.min.js"></script>
         <script src="/adminlte/bower_components/morris.js/morris.min.js"></script>
@@ -58,6 +78,17 @@ class Layout extends React.Component {
         <script src="/adminlte/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
         <script src="/adminlte/bower_components/fastclick/lib/fastclick.js"></script>
 
+        {/* Form -> Advanced */}
+        {/* <script src="../adminlte/bower_components/select2/dist/js/select2.full.min.js"></script> */}
+        <script src="../adminlte/node_modules/select2/dist/js/select2.full.min.js"></script>
+        <script src="../adminlte/plugins/input-mask/jquery.inputmask.js"></script>
+        <script src="../adminlte/plugins/input-mask/jquery.inputmask.date.extensions.js"></script>
+        <script src="../adminlte/plugins/input-mask/jquery.inputmask.extensions.js"></script>
+        <script src="../adminlte/plugins/iCheck/icheck.min.js"></script>
+        <script src="../adminlte/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
+        <script src="../adminlte/plugins/timepicker/bootstrap-timepicker.min.js"></script>
+        {/* Form -> Advanced */}
+
         {/* <script src="/adminlte/dist/js/adminlte.min.js"></script> */}
         <script src="/adminlte/build/js/BoxRefresh.js"></script>
         <script src="/adminlte/build/js/BoxWidget.js"></script>
@@ -68,7 +99,6 @@ class Layout extends React.Component {
         <script src="/adminlte/build/js/TodoList.js"></script>
         <script src="/adminlte/build/js/Tree.js"></script>
 
-        {/* <script src="/adminlte/dist/js/pages/dashboard.js"></script> */}
         <script src="/adminlte/dist/js/demo.js"></script>
       </>)
 

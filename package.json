@@ -14,7 +14,8 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "less": "^3.8.1"
+    "less": "^3.8.1",
+    "select2": "^4.0.5"
   },
   "dependencies": {
     "babel-plugin-react-html-attrs": "^2.1.0",
@@ -56,7 +57,6 @@
     "redux": "^4.0.0",
     "redux-devtools-extension": "^2.13.5",
     "redux-thunk": "^2.3.0",
-    "select2": "^4.0.5",
     "slimscroll": "^0.9.1"
   }
 }

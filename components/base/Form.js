@@ -126,6 +126,7 @@ export const Input = (
     lg, md, sm, xs,
     success, warning, error,
     horizontal,
+    className,
     wrapInFormGroup = true,
     ...props
   }) => {
@@ -176,7 +177,7 @@ export const Input = (
     const inputHelp = cloneFirst(inputHelps) || (help) && <InputHelp>{help}</InputHelp>
 
     // Input
-    const inputClass = builder()
+    const inputClass = builder(className)
       .append('form-control', (type !== 'file'))
       .append('input-sm', isTrue(small))
       .append('input-lg', isTrue(large))
