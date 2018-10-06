@@ -4,6 +4,7 @@ import {findDOMNode} from 'react-dom'
 import Layout from '../../components/layout/Layout.js'
 import Link from 'next/link'
 import fetch from 'isomorphic-unfetch'
+import moment from 'moment'
 
 import {
   typeMatch, matchChild, builder,
@@ -61,7 +62,7 @@ const Select2 = ({children, ...props }) =>
     <BoxBody>
       <Row>
         <Col md="6">
-          <Input type="select" label="Minimal" class="select2" style={{width: '100%'}}>
+          <Input type="select2" label="Minimal">
             <option>Alabama</option>
             <option>Alaska</option>
             <option>California</option>
@@ -70,7 +71,7 @@ const Select2 = ({children, ...props }) =>
             <option>Texas</option>
             <option>Washington</option>
           </Input>
-          <Input type="select" label="Disabled" class="select2" style={{width: '100%'}} disabled>
+          <Input type="select2" label="Disabled" disabled>
             <option>Alabama</option>
             <option>Alaska</option>
             <option>California</option>
@@ -81,7 +82,7 @@ const Select2 = ({children, ...props }) =>
           </Input>
         </Col>
         <Col md="6">
-          <Input type="select" label="Multiple" class="select2" style={{width: '100%'}} data-placeholder="Select a State" multiple>
+          <Input type="select2" label="Multiple" placeholder="Select a State" multiple>
             <option>Alabama</option>
             <option>Alaska</option>
             <option>California</option>
@@ -90,7 +91,7 @@ const Select2 = ({children, ...props }) =>
             <option>Texas</option>
             <option>Washington</option>
           </Input>
-          <Input type="select" label="Disabled Result" class="select2" style={{width: '100%'}}>
+          <Input type="select2" label="Disabled Result">
             <option>Alabama</option>
             <option>Alaska</option>
             <option disabled>California (disabled)</option>
@@ -110,182 +111,96 @@ const InputMasks = ({children, ...props }) =>
   <Box context="danger" collapsable removable>
     <BoxHeader title="Input masks"/>
     <BoxBody>
-      <Input type="text" label="Date masks:" data-inputmask="'alias': 'dd/mm/yyyy'" data-mask>
+      <Input type="inputmask" label="Date masks:" inputmask={{mask: 'dd/mm/yyyy'}} placeholder="dd/mm/yyyy">
         <InputAddon><Icon name="fa-calendar"/></InputAddon>
       </Input>
-      <Input type="text" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask>
+      <Input type="inputmask"                     inputmask={{mask: 'mm/dd/yyyy'}} placeholder="mm/dd/yyyy">
         <InputAddon><Icon name="fa-calendar"/></InputAddon>
       </Input>
-      <Input type="text" label="US phone masks:" data-inputmask='"mask": "(999) 999-9999"' data-mask>
+      <Input type="inputmask" label="US phone masks:" inputmask={{mask: '(999) 999-9999'}}>
         <InputAddon><Icon name="fa-phone"/></InputAddon>
       </Input>
-      <Input type="text" label="Intl US phone masks:" data-inputmask="'mask': ['999-999-9999 [x99999]', '+099 99 99 9999[9]-9999']" data-mask>
+      <Input type="inputmask" label="Intl US phone masks:" inputmask={{mask: ['999-999-9999 [x99999]', '+099 99 99 9999[9]-9999']}}>
         <InputAddon><Icon name="fa-phone"/></InputAddon>
       </Input>
-      <Input type="text" label="IP masks:" data-inputmask="'alias': 'ip'" data-mask>
+      <Input type="inputmask" label="IP masks:" inputmask={{alias: 'ip'}}>
         <InputAddon><Icon name="fa-laptop"/></InputAddon>
       </Input>
     </BoxBody>
   </Box>
-
-const ColorAndTimePickers_ = ({children, ...props }) => {
-  return (
-    <div class="box box-info">
-      <div class="box-header">
-        <h3 class="box-title">Color & Time Picker</h3>
-      </div>
-
-      <div class="box-body">
-        <div class="form-group">
-          <label>Color picker:</label>
-          <input type="text" class="form-control my-colorpicker1"/>
-        </div>
-
-        <div class="form-group">
-          <label>Color picker with addon:</label>
-          <div class="input-group my-colorpicker2">
-            <input type="text" class="form-control"/>
-            <div class="input-group-addon">
-              <i></i>
-            </div>
-          </div>
-        </div>
-
-        <div class="bootstrap-timepicker">
-          <div class="form-group">
-            <label>Time picker:</label>
-            <div class="input-group">
-              <input type="text" class="form-control timepicker"/>
-              <div class="input-group-addon">
-                <i class="fa fa-clock-o"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  )
-}
-const ColorAndTimePickers = ({children, caller, ...props }) =>
+const ColorAndTimePickers = ({children, ...props }) =>
   <Box context="info" collapsable removable>
     <BoxHeader title="Color & Time Picker"/>
     <BoxBody>
-      <Input type="colorpicker" label="Magic Color picker:"/>
-      <Input type="text" label="Magic Color picker with addon:" class="my-colorpicker1">
+      <Input type="colorpicker" label="Color picker:"/>
+      <Input type="text" label="Color picker with addon:">
         <InputAddon right colorpicker><i></i></InputAddon>
       </Input>
 
-      <div class="form-group">
-        <label>Color picker with addon:</label>
-        <div class="input-group my-colorpicker2">
-          <input type="text" class="form-control"/>
-          <div class="input-group-addon">
-            <i></i>
-          </div>
-        </div>
-      </div>
+      <Input type="timepicker" label="Time picker:" timepicker={{showInputs: false}}>
+        <InputAddon right><Icon name="fa-clock-o"/></InputAddon>
 
 
-      {/* TODO: Allow passing the InputGroup to allow className */}
 
+
+
+      </Input>
+
+      {/* Input Group must include 'bootstrap-timepicker' in order for popup */}
+      {/*
       <div class="bootstrap-timepicker">
         <Input type="text" label="Time picker:" class="timepicker">
           <InputAddon right><Icon name="fa-clock-o"/></InputAddon>
         </Input>
       </div>
+      */}
 
       <div>
         TODO: Update Colorpicker <a href="https://casesandberg.github.io/react-color/">React Colorpicker</a>
       </div>
     </BoxBody>
   </Box>
-const DatePickers_ = ({children, ...props }) => {
-  return (
-    <div class="box box-primary">
-      <div class="box-header">
-        <h3 class="box-title">Date picker</h3>
-      </div>
-      <div class="box-body">
-        <div class="form-group">
-          <label>Date:</label>
-          <div class="input-group date">
-            <div class="input-group-addon">
-              <i class="fa fa-calendar"></i>
-            </div>
-            <input type="text" class="form-control pull-right" id="datepicker"/>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Date range:</label>
-          <div class="input-group">
-            <div class="input-group-addon">
-              <i class="fa fa-calendar"></i>
-            </div>
-            <input type="text" class="form-control pull-right" id="reservation"/>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Date and time range:</label>
-          <div class="input-group">
-            <div class="input-group-addon">
-              <i class="fa fa-clock-o"></i>
-            </div>
-            <input type="text" class="form-control pull-right" id="reservationtime"/>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Date range button:</label>
-          <div class="input-group">
-            <button type="button" class="btn btn-default pull-right" id="daterange-btn">
-              <span>
-                <i class="fa fa-calendar"></i> Date range picker
-              </span>
-              <i class="fa fa-caret-down"></i>
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  )
-}
 const DatePickers = ({children, ...props }) =>
   <Box context="primary" collapsable removable>
     <BoxHeader title="Date picker"/>
     <BoxBody>
-      <div class="form-group">
-        <label>Date:</label>
-        <div class="input-group date">
-          <div class="input-group-addon">
-            <i class="fa fa-calendar"></i>
-          </div>
-          <input type="text" class="form-control pull-right" id="datepicker"/>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Date range:</label>
+      <Input type="datepicker" label="Date:" datepicker={{autoclose: true}}>
+        <InputAddon><Icon name="fa-calendar"/></InputAddon>
+      </Input>
+      <Input type="daterangepicker" label="Date range:" class="pull-right">
+        <InputAddon><Icon name="fa-calendar"/></InputAddon>
+      </Input>
+      <Input type="daterangepicker" label="Date and time range:" class="pull-right"  daterangepicker={{ timePicker: true, timePickerIncrement: 30, format: 'MM/DD/YYYY h:mm A' }}>
+        <InputAddon><Icon name="fa-clock-o"/></InputAddon>
+      </Input>
+      {/*
+      <Input type="daterangepicker" label="Date range button:" class="pull-right" daterangepicker={
+        {
+          ranges : {
+            'Today'       : [moment(),                                        moment()],
+            'Yesterday'   : [moment().subtract(1, 'days'),                    moment().subtract(1, 'days')],
+            'Last 7 Days' : [moment().subtract(6, 'days'),                    moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'),                   moment()],
+            'This Month'  : [moment().startOf('month'),                       moment().endOf('month')],
+            'Last Month'  : [moment().subtract(1, 'month').startOf('month'),  moment().subtract(1, 'month').endOf('month')]
+          },
+          startDate: moment().subtract(29, 'days'),
+          endDate  : moment()
+        },
+        function (start, end) {
+          console.log({start, end});
+          $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+        }
+      }>
         <div class="input-group">
-          <div class="input-group-addon">
-            <i class="fa fa-calendar"></i>
-          </div>
-          <input type="text" class="form-control pull-right" id="reservation"/>
+          <button type="button" class="btn btn-default pull-right" id="daterange-btn">
+            <span>
+              <i class="fa fa-calendar"></i> Date range picker
+            </span>
+            <i class="fa fa-caret-down"></i>
+          </button>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label>Date and time range:</label>
-        <div class="input-group">
-          <div class="input-group-addon">
-            <i class="fa fa-clock-o"></i>
-          </div>
-          <input type="text" class="form-control pull-right" id="reservationtime"/>
-        </div>
-      </div>
+      </Input>
 
       <div class="form-group">
         <label>Date range button:</label>
@@ -298,295 +213,95 @@ const DatePickers = ({children, ...props }) =>
           </button>
         </div>
       </div>
+    */}
 
     </BoxBody>
   </Box>
-const IChecks_ = ({children, ...props }) => {
-  return (
-    <div class="box box-success">
-      <div class="box-header">
-        <h3 class="box-title">iCheck - Checkbox &amp; Radio Inputs</h3>
-      </div>
-      <div class="box-body">
-
-        <div class="form-group">
-          <label>
-            <input type="checkbox" class="minimal" checked/>
-          </label>
-          <label>
-            <input type="checkbox" class="minimal"/>
-          </label>
-          <label>
-            <input type="checkbox" class="minimal" disabled/> Minimal skin checkbox
-          </label>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="radio" name="r1" class="minimal" checked/>
-          </label>
-          <label>
-            <input type="radio" name="r1" class="minimal"/>
-          </label>
-          <label>
-            <input type="radio" name="r1" class="minimal" disabled/> Minimal skin radio
-          </label>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="checkbox" class="minimal-red" checked/>
-          </label>
-          <label>
-            <input type="checkbox" class="minimal-red"/>
-          </label>
-          <label>
-            <input type="checkbox" class="minimal-red" disabled/> Minimal red skin checkbox
-          </label>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="radio" name="r2" class="minimal-red" checked/>
-          </label>
-          <label>
-            <input type="radio" name="r2" class="minimal-red"/>
-          </label>
-          <label>
-            <input type="radio" name="r2" class="minimal-red" disabled/> Minimal red skin radio
-          </label>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="checkbox" class="flat-red" checked/>
-          </label>
-          <label>
-            <input type="checkbox" class="flat-red"/>
-          </label>
-          <label>
-            <input type="checkbox" class="flat-red" disabled/> Flat green skin checkbox
-          </label>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="radio" name="r3" class="flat-red" checked/>
-          </label>
-          <label>
-            <input type="radio" name="r3" class="flat-red"/>
-          </label>
-          <label>
-            <input type="radio" name="r3" class="flat-red" disabled/> Flat green skin radio
-          </label>
-        </div>
-      </div>
-      <div class="box-footer">
-        Many more skins available. <a href="http://fronteed.com/iCheck/">Documentation</a>
-      </div>
-    </div>
-  )
-}
 const IChecks = ({children, ...props }) =>
   <Box context="success" collapsable removable>
     <BoxHeader title="iCheck - Checkbox &amp; Radio Inputs"/>
     <BoxBody>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" class="minimal" checked/>
-        </label>
-        <label>
-          <input type="checkbox" class="minimal"/>
-        </label>
-        <label>
-          <input type="checkbox" class="minimal" disabled/> Minimal skin checkbox
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>
-          <input type="radio" name="r1" class="minimal" checked/>
-        </label>
-        <label>
-          <input type="radio" name="r1" class="minimal"/>
-        </label>
-        <label>
-          <input type="radio" name="r1" class="minimal" disabled/> Minimal skin radio
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>
-          <input type="checkbox" class="minimal-red" checked/>
-        </label>
-        <label>
-          <input type="checkbox" class="minimal-red"/>
-        </label>
-        <label>
-          <input type="checkbox" class="minimal-red" disabled/> Minimal red skin checkbox
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>
-          <input type="radio" name="r2" class="minimal-red" checked/>
-        </label>
-        <label>
-          <input type="radio" name="r2" class="minimal-red"/>
-        </label>
-        <label>
-          <input type="radio" name="r2" class="minimal-red" disabled/> Minimal red skin radio
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>
-          <input type="checkbox" class="flat-red" checked/>
-        </label>
-        <label>
-          <input type="checkbox" class="flat-red"/>
-        </label>
-        <label>
-          <input type="checkbox" class="flat-red" disabled/> Flat green skin checkbox
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>
-          <input type="radio" name="r3" class="flat-red" checked/>
-        </label>
-        <label>
-          <input type="radio" name="r3" class="flat-red"/>
-        </label>
-        <label>
-          <input type="radio" name="r3" class="flat-red" disabled/> Flat green skin radio
-        </label>
-      </div>
-
+      <Col><H h3>Context Colors</H></Col>
+      {[
+        'primary',
+        'default',
+        'success',
+        'info',
+        'warning',
+        'danger'
+      ].map((color, key) =>
+        <Col xs={2} key={color} context={color} solid>
+          <H h4 class="text-center">{color}</H>
+          <FormGroup class="text-center">
+            <Input type="checkbox" id={`icheck-01-checkbox-${color}`} icheck={color} defaultChecked/>
+            <Input type="checkbox" id={`icheck-02-checkbox-${color}`} icheck={color} />
+            <Input type="checkbox" id={`icheck-03-checkbox-${color}`} icheck={color} disabled defaultChecked/>
+            <Input type="checkbox" id={`icheck-04-checkbox-${color}`} icheck={color} disabled/>
+            <Input type="radio" id={`icheck-01-radio-${color}`} name={`icheck-enabled-radio-${color}`} icheck={color} defaultChecked/>
+            <Input type="radio" id={`icheck-02-radio-${color}`} name={`icheck-enabled-radio-${color}`} icheck={color}/>
+            <Input type="radio" id={`icheck-03-radio-${color}`} name={`icheck-disabled-radio-${color}`} icheck={color} disabled defaultChecked/>
+            <Input type="radio" id={`icheck-04-radio-${color}`} name={`icheck-disabled-radio-${color}`} icheck={color} disabled/>
+          </FormGroup>
+        </Col>
+      )}
+      <Col><H h3>Flat UI Colors</H></Col>
+      {[
+        'turquoise',
+        'emerland',
+        'peterriver',
+        'amethyst',
+        'wetasphalt',
+        'greensea',
+        'nephritis',
+        'belizehole',
+        'wisteria',
+        'midnightblue',
+        'sunflower',
+        'carrot',
+        'alizarin',
+        'clouds',
+        'concrete',
+        'orange',
+        'pumpkin',
+        'pomegranate',
+        'silver',
+        'asbestos'
+      ].map((color, key) =>
+        <Col xs={3} key={color} context={color} solid>
+          <H h4 class="text-center">{color}</H>
+          <FormGroup class="text-center">
+            <Input type="checkbox" id={`icheck-01-checkbox-${color}`} icheck={color} defaultChecked/>
+            <Input type="checkbox" id={`icheck-02-checkbox-${color}`} icheck={color} />
+            <Input type="checkbox" id={`icheck-03-checkbox-${color}`} icheck={color} disabled defaultChecked/>
+            <Input type="checkbox" id={`icheck-04-checkbox-${color}`} icheck={color} disabled/>
+            <Input type="radio" id={`icheck-01-radio-${color}`} name={`icheck-enabled-radio-${color}`} icheck={color} defaultChecked/>
+            <Input type="radio" id={`icheck-02-radio-${color}`} name={`icheck-enabled-radio-${color}`} icheck={color}/>
+            <Input type="radio" id={`icheck-03-radio-${color}`} name={`icheck-disabled-radio-${color}`} icheck={color} disabled defaultChecked/>
+            <Input type="radio" id={`icheck-04-radio-${color}`} name={`icheck-disabled-radio-${color}`} icheck={color} disabled/>
+          </FormGroup>
+        </Col>
+      )}
     </BoxBody>
     <BoxFooter>
-      Many more skins available. <a href="http://fronteed.com/iCheck/">Documentation</a>
+      Many more skins available. <a href="https://bantikyan.github.io/icheck-bootstrap//">Documentation</a>
     </BoxFooter>
   </Box>
-
-// const Select2 = ({children, ...props }) => {
-//   return (
-//
-//   )
-// }
-
 
 class Page extends Component {
   title = 'Advanced Form Elements'
   tagLine = 'Preview'
-  colorpickers = []
   constructor() {
     super()
-    this.colorpickerAttach = this.colorpickerAttach.bind(this)
-  }
-  colorpickerAttach(el) {
-    this.colorpickers.push(el)
   }
   componentDidMount()  {
     console.log(`componentDidMount (${this.title})`)
-    this.legacyCode()
-
-    this.colorpickers.forEach(colorpicker => $(findDOMNode(colorpicker)).colorpicker())
   }
   componentDidUpdate() {
-    console.log(`componentDidUpdate (${this.title})`)
-    this.legacyCode()
-  }
-  legacyCode() {
-    //Initialize Select2 Elements
-    $('.select2').select2()
-
-    //Datemask dd/mm/yyyy
-    $('#datemask').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
-    //Datemask2 mm/dd/yyyy
-    $('#datemask2').inputmask('mm/dd/yyyy', { 'placeholder': 'mm/dd/yyyy' })
-    //Money Euro
-    $('[data-mask]').inputmask()
-
-    //Date range picker
-    $('#reservation').daterangepicker()
-    //Date range picker with time picker
-    $('#reservationtime').daterangepicker({ timePicker: true, timePickerIncrement: 30, format: 'MM/DD/YYYY h:mm A' })
-    //Date range as a button
-    $('#daterange-btn').daterangepicker(
-      {
-        ranges   : {
-          'Today'       : [moment(), moment()],
-          'Yesterday'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-          'Last 7 Days' : [moment().subtract(6, 'days'), moment()],
-          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-          'This Month'  : [moment().startOf('month'), moment().endOf('month')],
-          'Last Month'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-        },
-        startDate: moment().subtract(29, 'days'),
-        endDate  : moment()
-      },
-      function (start, end) {
-        $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
-      }
-    )
-
-    //Date picker
-    $('#datepicker').datepicker({
-      autoclose: true
-    })
-
-    //iCheck for checkbox and radio inputs
-    $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
-      checkboxClass: 'icheckbox_minimal-blue',
-      radioClass   : 'iradio_minimal-blue'
-    })
-    //Red color scheme for iCheck
-    $('input[type="checkbox"].minimal-red, input[type="radio"].minimal-red').iCheck({
-      checkboxClass: 'icheckbox_minimal-red',
-      radioClass   : 'iradio_minimal-red'
-    })
-    //Flat red color scheme for iCheck
-    $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
-      checkboxClass: 'icheckbox_flat-green',
-      radioClass   : 'iradio_flat-green'
-    })
-
-    // //Colorpicker
-    // $('.my-colorpicker1').colorpicker()
-    // //color picker with addon
-    // $('.my-colorpicker2').colorpicker()
-
-    //Timepicker
-    $('.timepicker').timepicker({
-      showInputs: false
-    })
-  }
+    console.log(`componentDidUpdate (${this.title})`)  }
 
   render() {
     return (
       <Layout title={this.title} tagLine={this.tagLine}>
-        <Row>
-          <Col md="6">
-            <Row>
-              <ColorAndTimePickers caller={this}/>
-              {/*
-              <DatePickers/>
-              <IChecks/>
-               */}
-            </Row>
-          </Col>
-          <Col md="6">
-            {/*
-            <ColorAndTimePickers_/>
-            <DatePickers_/>
-            <IChecks_/>
-             */}
-          </Col>
-        </Row>
-
-        {/* WIP Above */}
-        {/*
         <Row>
           <Select2/>
         </Row>
@@ -594,17 +309,16 @@ class Page extends Component {
           <Col md="6">
             <Row>
               <InputMasks/>
-              <colorAndTimePickers/>
+              <ColorAndTimePickers/>
+              <DatePickers/>
             </Row>
           </Col>
           <Col md="6">
             <Row>
-              <DatePickers/>
               <IChecks/>
             </Row>
           </Col>
         </Row>
-         */}
       </Layout>
     )
   }

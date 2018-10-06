@@ -29,21 +29,20 @@ class Layout extends React.Component {
 
     const AdminLteHead = (
       <>
-        <link rel="stylesheet" href="/adminlte/bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+                                <link rel="stylesheet" href="/adminlte/node_modules/bootstrap/dist/css/bootstrap.min.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/font-awesome/css/font-awesome.min.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/Ionicons/css/ionicons.min.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/morris.js/morris.css"/>
         <link rel="stylesheet" href="/adminlte/bower_components/jvectormap/jquery-jvectormap.css"/>
-        <link rel="stylesheet" href="/adminlte/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css"/>
-        <link rel="stylesheet" href="/adminlte/bower_components/bootstrap-daterangepicker/daterangepicker.css"/>
+                                <link rel="stylesheet" href="/adminlte/node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css"/>
+                                <link rel="stylesheet" href="/adminlte/node_modules/bootstrap-daterangepicker/daterangepicker.css"/>
         <link rel="stylesheet" href="/adminlte/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css"/>
 
         {/* Form -> Advanced */}
-        <link rel="stylesheet" href="/adminlte/plugins/iCheck/all.css"/>
-        <link rel="stylesheet" href="/adminlte/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css"/>
-        <link rel="stylesheet" href="/adminlte/plugins/timepicker/bootstrap-timepicker.min.css"/>
-        {/* <link rel="stylesheet" href="/adminlte/bower_components/select2/dist/css/select2.min.css"/> */}
-        <link rel="stylesheet" href="/adminlte/node_modules/select2/dist/css/select2.min.css"/>
+                                <link rel="stylesheet" href="/adminlte/node_modules/icheck-bootstrap/icheck-bootstrap.min.css"/>
+                                <link rel="stylesheet" href="/adminlte/node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css"/>
+                                <link rel="stylesheet" href="/adminlte/node_modules/bootstrap-timepicker/css/bootstrap-timepicker.min.css"/>
+                                <link rel="stylesheet" href="/adminlte/node_modules/select2/dist/css/select2.min.css"/>
         {/* Form -> Advanced */}
 
         <link rel="stylesheet" href="/adminlte/dist/css/AdminLTE.min.css"/>
@@ -64,7 +63,7 @@ class Layout extends React.Component {
         <script src="/adminlte/bower_components/jquery-ui/jquery-ui.min.js"></script>
         {/* <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip --> */}
         {/* <script>$.widget.bridge('uibutton', $.ui.button);</script> */}
-        <script src="/adminlte/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+                                <script src="/adminlte/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
         <script src="/adminlte/bower_components/raphael/raphael.min.js"></script>
         <script src="/adminlte/bower_components/morris.js/morris.min.js"></script>
         <script src="/adminlte/bower_components/jquery-sparkline/dist/jquery.sparkline.min.js"></script>
@@ -72,21 +71,20 @@ class Layout extends React.Component {
         <script src="/adminlte/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
         <script src="/adminlte/bower_components/jquery-knob/dist/jquery.knob.min.js"></script>
         <script src="/adminlte/bower_components/moment/min/moment.min.js"></script>
-        <script src="/adminlte/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
-        <script src="/adminlte/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+                                <script src="/adminlte/node_modules/bootstrap-daterangepicker/daterangepicker.js"></script>
+                                <script src="/adminlte/node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
         <script src="/adminlte/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
         <script src="/adminlte/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
         <script src="/adminlte/bower_components/fastclick/lib/fastclick.js"></script>
 
         {/* Form -> Advanced */}
-        {/* <script src="../adminlte/bower_components/select2/dist/js/select2.full.min.js"></script> */}
-        <script src="../adminlte/node_modules/select2/dist/js/select2.full.min.js"></script>
-        <script src="../adminlte/plugins/input-mask/jquery.inputmask.js"></script>
-        <script src="../adminlte/plugins/input-mask/jquery.inputmask.date.extensions.js"></script>
-        <script src="../adminlte/plugins/input-mask/jquery.inputmask.extensions.js"></script>
-        <script src="../adminlte/plugins/iCheck/icheck.min.js"></script>
-        <script src="../adminlte/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
-        <script src="../adminlte/plugins/timepicker/bootstrap-timepicker.min.js"></script>
+                                <script src="../adminlte/node_modules/select2/dist/js/select2.full.min.js"></script>
+                                <script src="../adminlte/node_modules/inputmask/dist/min/jquery.inputmask.bundle.min.js"></script>
+                                {/* <script src="../adminlte/plugins/input-mask/jquery.inputmask.js"></script> */}
+                                {/* <script src="../adminlte/plugins/input-mask/jquery.inputmask.date.extensions.js"></script> */}
+                                {/* <script src="../adminlte/plugins/input-mask/jquery.inputmask.extensions.js"></script> */}
+                                <script src="../adminlte/node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js"></script>
+                                <script src="../adminlte/node_modules/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
         {/* Form -> Advanced */}
 
         {/* <script src="/adminlte/dist/js/adminlte.min.js"></script> */}
