@@ -36,6 +36,7 @@
     "bootstrap-timepicker": "^0.5.2",
     "bootstrap-datepicker": "^1.7.0",
     "bootstrap-daterangepicker": "^2.1.25",
+    "inputmask": "jquery.inputmask#^3.3.7",
 
     "select2": "^4.0.3"
   },
@@ -52,7 +53,6 @@
     "Flot": "flot#^0.8.3",
     "font-awesome": "^4.7.0",
     "fullcalendar": "^3.4.0",
-    "inputmask": "jquery.inputmask#^3.3.7",
     "ion.rangeSlider": "ionrangeslider#^2.2.0",
     "Ionicons": "ionicons#^2.0.1",
     "jquery-knob": "^1.2.13",

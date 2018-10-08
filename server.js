@@ -6,64 +6,82 @@ const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
 
-const Sequelize = require('sequelize')
-const sequelize = new Sequelize(
-  'database',
-  'username',
-  'password',
-  {
-    dialect: 'sqlite',
-    storage: './db/app.sqlite'
-  }
-)
+// const fs = require('fs-extra')
+//
+// const appDbPath = './db/'
+// const appDbFile = 'app.sqlite'
+// fs.ensureDirSync(appDbPath)
+// const appDbFullPath = path.resolve(appDbPath, appDbFile)
 
-sequelize
-  .authenticate()
-  .then(
-    () => {
-      console.log('Connection has been established successfully');
-    }
-  )
-  .catch(
-    (err) => {
-      console.log('Unable to connect');
-    }
-  )
+const sequelizeConfig = require('./package.json').sequelize[0]
+console.log({sequelizeConfig});
 
-const App = sequelize
-  .define(
-    'app',
-    {
-      version: {
-        type: Sequelize.STRING
-      }
-    }
-  )
+const sequelizeSetup = require('./sequelize').setup
+console.log({sequelizeSetup});
+sequelizeSetup()
 
-App.sync(
-    // {force: true}
-  )
-  .then(
-    () => {
-      console.log('Setup App table successfully');
-      return App.create({
-        version: 3
-      })
-    }
-  )
-  .then(
-    () => {
-      return App.findAll().then(users => {
-        console.log(users)
-      })
 
-    }
-  )
-  .catch(
-    (err) => {
-      console.log('Cannot setup App table');
-    }
-  )
+// console.log(path.resolve(appDbPath, appDbFile));
+// const Sequelize = require('sequelize')
+// const sequelize = new Sequelize(
+//   'database',
+//   'username',
+//   'password',
+//   {
+//     dialect: 'sqlite',
+//     storage: appDbFullPath
+//   }
+// )
+// const {db} = require('./package.json')
+// console.log(db);
+
+// sequelize
+//   .authenticate()
+//   .then(
+//     () => {
+//       console.log('Connection has been established successfully');
+//     }
+//   )
+//   .catch(
+//     (err) => {
+//       console.log('Unable to connect');
+//     }
+//   )
+//
+// const App = sequelize
+//   .define(
+//     'app',
+//     {
+//       version: {
+//         type: Sequelize.STRING
+//       }
+//     }
+//   )
+//
+// App.sync(
+//     // {force: true}
+//   )
+//   .then(
+//     () => {
+//       console.log('Setup App table successfully');
+//       return App.create({
+//         version: 3
+//       })
+//     }
+//   )
+//   .then(
+//     () => {
+//       return App.findAll().then(users => {
+//         console.log(users)
+//       })
+//
+//     }
+//   )
+//   .catch(
+//     (err) => {
+//       console.log('Cannot setup App table');
+//     }
+//   )
 
 
 

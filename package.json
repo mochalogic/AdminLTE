@@ -3,7 +3,7 @@
   "version": "2.4.2",
   "main": "dist/js/adminlte.min.js",
   "scripts": {
-    "dev": "nodemon -w server.js server.js",
+    "dev": "nodemon server.js",
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "export": "next export"
@@ -13,6 +13,25 @@
     "url": "git://github.com/almasaeed2010/AdminLTE.git"
   },
   "license": "MIT",
+  "sequelize": [
+    {
+      "name": "app",
+      "dialect": "sqlite",
+      "database": null,
+      "username": null,
+      "password": null,
+      "sqlitePath": "db",
+      "sqliteFile": "app.sqlite"
+    }
+  ],
+  "nodemonConfig": {
+    "watch": [
+      "package.json",
+      ".babelrc",
+      "server.js",
+      "sequelize/"
+    ]
+  },
   "devDependencies": {
     "less": "^3.8.1",
     "nodemon": "^1.18.4",
@@ -34,6 +53,7 @@
     "fastclick": "^1.0.6",
     "flot": "^0.8.0-alpha",
     "font-awesome": "^4.7.0",
+    "fs-extra": "^7.0.0",
     "fullcalendar": "^3.9.0",
     "icheck-bootstrap": "^3.0.1",
     "inputmask": "^3.3.11",
