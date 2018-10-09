@@ -333,7 +333,7 @@ export const Button = ({children, id, context, label, submit, className, right, 
 
   const type = submit ? 'submit' : 'button'
 
-  return <button class={buttonClass.join(' ')} type={type} id={id} data-toggle={toggle && 'dropdown'}>{children || label}{toggle && <Icon name="fa-caret-down"/>}</button>
+  return <button class={buttonClass.join(' ')} type={type} id={id} data-toggle={toggle && 'dropdown'} {...props}>{children || label}{toggle && <Icon name="fa-caret-down"/>}</button>
 }
 
 export const Form = ({children, horizontal, lg, md, sm, xs, ...props}) => {

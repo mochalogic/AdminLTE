@@ -603,6 +603,7 @@ const demoContent = () => {
 
 class Page extends React.Component {
   title = 'The Page Title'
+  tagLine = 'Tag Line'
   // static async getInitialProps() {
   //   const res = await fetch('https://api.tvmaze.com/search/shows?q=batman')
   //   const data = await res.json()

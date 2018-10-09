@@ -91,6 +91,7 @@ const baseUrl = '/demo'
 const menu = {
   menuItems: [
     {title: 'MAIN NAVIGATION', header: true},
+    {title: 'Eric', href: `${baseUrl}/eric`},
     {title: 'Dashboard', icon: 'fa-dashboard',
       menuItems: [
         {title: 'Dashboard v1',       href: `${baseUrl}/dashboard`}, //, selected: true

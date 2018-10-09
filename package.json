@@ -34,10 +34,13 @@
   },
   "devDependencies": {
     "less": "^3.8.1",
+    "morgan": "^1.9.1",
     "nodemon": "^1.18.4",
-    "select2": "^4.0.5"
+    "select2": "^4.0.5",
+    "sequelize-cli": "^4.1.1"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "babel-plugin-react-html-attrs": "^2.1.0",
     "bootstrap": "^3.3.7",
     "bootstrap-colorpicker": "^2.5.3",
@@ -47,6 +50,7 @@
     "bootstrap-timepicker": "^0.5.2",
     "chart.js": "1.0.*",
     "ckeditor": "^4.10.1",
+    "cookie-parser": "^1.4.3",
     "datatables.net": "^1.10.19",
     "datatables.net-bs": "^1.10.19",
     "express": "^4.16.3",
