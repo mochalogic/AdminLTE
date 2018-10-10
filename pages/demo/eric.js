@@ -101,8 +101,41 @@ class Page extends React.Component {
         console.log({err});
       })
   }
-  componentTypeUpdate(componentType) {}
-  componentTypeDelete(componentType) {}
+  componentTypeUpdate(componentType) {
+    console.log({f: 'componentTypeUpdate', componentType});
+    return new Promise(
+      (resolve, reject) => {
+        if (!componentType.id) reject('ID Missing')
+        resolve(componentType.id)
+      })
+      .then((id) => {
+        console.log({id});
+        const componentTypeUpdate = {...componentType}
+        return axios.put(`/api/componentType/${id}`, componentTypeUpdate)
+      })
+      .then((res) => {
+        console.log({res});
+        return this.componentTypeRead()
+      })
+  }
+  componentTypeDelete(componentType) {
+    console.log({f: 'componentTypeDelete', componentType});
+
+    return new Promise(
+      (resolve, reject) => {
+        if (!componentType.id) reject('ID Missing')
+        resolve(componentType.id)
+      })
+      .then((id) => {
+        console.log({id});
+        const componentTypeUpdate = {...componentType}
+        return axios.delete(`/api/componentType/${id}`)
+      })
+      .then((res) => {
+        console.log({res});
+        return this.componentTypeRead()
+      })
+  }
   componentTypeClear() {
     const stateNew = {...this.state}
 
@@ -138,13 +171,15 @@ class Page extends React.Component {
       case 'create':
         return modelName == 'componentType' ? this.componentTypeCreate(model).then(() => this.componentTypeClear()) : null
       case 'update':
-        break;
+        return modelName == 'componentType' ? this.componentTypeUpdate(model).then(() => this.componentTypeClear()).catch((e) => console.log({f: 'catch', e})) : null
       case 'delete':
-        break;
+        return modelName == 'componentType' ? this.componentTypeDelete(model).then(() => this.componentTypeClear()) : null
       case 'clear':
         return modelName == 'componentType' ? this.componentTypeClear() : null
       case 'selected':
         return modelName == 'componentType' ? this.componentTypeSelected(model) : null
+      case 'refresh':
+        return this.componentTypeRead()
     }
   }
 
@@ -179,6 +214,11 @@ class Page extends React.Component {
 
     return (
       <Layout title="Eric's Test Page" tagLine="My Tests">
+        <style jsx>{`
+          div button:not(:first-child) {
+            margin-left: 10px;
+          }
+        `}</style>
         <Row>
           <Box context="success">
             <BoxHeader>Add</BoxHeader>
@@ -193,10 +233,11 @@ class Page extends React.Component {
               )}
             </BoxBody>
             <BoxFooter>
-              <Button id="create" label="Create" context="success" onClick={this.clickHandler('componentType', componentType)} value="create" class="pull-right" />
-              <Button id="update" label="Update" context="warning" onClick={this.clickHandler('componentType', componentType)} value="update" class="pull-right" />
-              <Button id="delete" label="Delete" context="danger" onClick={this.clickHandler('componentType', componentType)} value="delete" class="pull-right" />
               <Button id="clear" label="Clear" context="info" onClick={this.clickHandler('componentType', componentType)} value="clear"/>
+              <Button id="refresh" label="Refresh" context="default" onClick={this.clickHandler('componentType', componentType)} value="refresh"/>
+              {componentType.id && <Button id="update" label="Update" context="warning" onClick={this.clickHandler('componentType', componentType)} value="update" class="pull-right" />}
+              {componentType.id && <Button id="delete" label="Delete" context="danger" onClick={this.clickHandler('componentType', componentType)} value="delete" class="pull-right" />}
+              {!componentType.id && <Button id="create" label="Create" context="success" onClick={this.clickHandler('componentType', componentType)} value="create" class="pull-right" />}
             </BoxFooter>
           </Box>
           <Box context="primary">

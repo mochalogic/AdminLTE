@@ -8,11 +8,31 @@ import SidebarLeft from './SidebarLeft.js'
 import SidebarRight from './SidebarRight.js'
 import Footer from './Footer.js'
 
-import withNProgress from "next-nprogress";
-import NProgressStyles from "next-nprogress/styles";
+import withNProgress from 'next-nprogress';
+import NProgressStyles from 'next-nprogress/styles';
+import NProgress from 'nprogress';
+
+import axios from 'axios'
+
+const axiosRegisterNProgress = () => {
+  const calculatePercentage = (loaded, total) => (Math.floor(loaded * 1.0) / total)
+
+  axios.defaults.onDownloadProgress = e => {
+    const percentage = calculatePercentage(e.loaded, e.total)
+    NProgress.set(percentage)
+  }
+
+  axios.interceptors.response.use(response => {
+    NProgress.done(true)
+    return response
+  })
+}
+
 
 class Layout extends React.Component {
   componentDidMount()  {
+    axiosRegisterNProgress()
+
     this.legacyCode()
   }
   componentDidUpdate() {
