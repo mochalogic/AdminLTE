@@ -3,9 +3,15 @@ module.exports = (sequelize, DataTypes) => {
   const ComponentType = sequelize.define(
     'ComponentType',
     {
-      name: DataTypes.STRING,
-      category: DataTypes.STRING,
-      version: DataTypes.INTEGER
+      name: {
+        type: DataTypes.STRING
+      },
+      category: {
+        type: DataTypes.STRING
+      },
+      version: {
+        type: DataTypes.INTEGER
+      }
     },
     {});
   ComponentType.associate = function(models) {

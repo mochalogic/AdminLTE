@@ -46,6 +46,45 @@ import {
   H
 } from '../../components/base/Form'
 
+const componentTypeVM = {
+  id: {
+    title: 'ID',
+    description: 'The Name',
+    isReadonly: true,
+    isHidden: false,
+  },
+  name: {
+    title: 'Name',
+    description: 'The Name',
+    isReadonly: false,
+    isHidden: false,
+  },
+  category: {
+    title: 'Category',
+    description: 'The Category',
+    isReadonly: false,
+    isHidden: false,
+  },
+  version: {
+    title: 'Version',
+    description: 'The Version',
+    isReadonly: false,
+    isHidden: false,
+  },
+  createdAt: {
+    title: 'Created On',
+    description: 'The Version',
+    isReadonly: true,
+    isHidden: false,
+  },
+  updatedAt: {
+    title: 'Updated On',
+    description: 'The Version',
+    isReadonly: true,
+    isHidden: false,
+  }
+}
+
 class Page extends React.Component {
   title = 'The Page Title'
   tagLine = 'Tag Line'
@@ -63,10 +102,9 @@ class Page extends React.Component {
 
     this.state = {
       componentType: {
-        id: null,
-        name: null,
-        category: null,
-        version: null
+        // name: null,
+        // category: null,
+        // version: null
       },
       componentTypes: []
     }
@@ -153,7 +191,6 @@ class Page extends React.Component {
     this.setState(stateNew)
   }
 
-
   clickHandler = (modelName, model, action) => (element) => {
     const key = element.target.id
     const value = element.target.value
@@ -206,15 +243,17 @@ class Page extends React.Component {
 
   render() {
     const componentType = this.state.componentType
-    const componentTypeColumns = Object.keys(componentType)
+    const componentTypeSelected = this.state.componentType
     const componentTypes = this.state.componentTypes
-    const componentTypesColumns = componentTypes && componentTypes.length ? Object.keys(componentTypes[0]) : []
+    // const keyValue(componentTypeVM) = componentTypes &&vm ? Object.keys(componentTypes[0]) : []
 
-    console.log({componentType, componentTypeColumns, componentTypes, componentTypesColumns});
+    const keyValue = (obj) => Object.keys(obj).map(key => {return {key, value: obj[key]}})
+
+    console.log({componentType, componentTypes, componentTypeVM});
 
     return (
       <Layout title="Eric's Test Page" tagLine="My Tests">
-        <style jsx>{`
+        <style jsx global>{`
           div button:not(:first-child) {
             margin-left: 10px;
           }
@@ -223,14 +262,17 @@ class Page extends React.Component {
           <Box context="success">
             <BoxHeader>Add</BoxHeader>
             <BoxBody>
-              {componentTypeColumns.map((componentTypeColumn) =>
-                <Input
-                  type="text"
-                  id={componentTypeColumn}
-                  label={componentTypeColumn}
-                  value={componentType[componentTypeColumn] || ''}
-                  onChange={this.changeHandler('componentType', componentTypeColumn)} />
-              )}
+              {keyValue(componentTypeVM)
+                .filter(filter => !filter.value.isReadonly)
+                .map((column) =>
+                  <Input
+                    type="text"
+                    id={column.key}
+                    label={column.value.title}
+                    value={componentType[column.key] || ''}
+                    onChange={this.changeHandler('componentType', column.key)} />
+                )
+              }
             </BoxBody>
             <BoxFooter>
               <Button id="clear" label="Clear" context="info" onClick={this.clickHandler('componentType', componentType)} value="clear"/>
@@ -247,13 +289,17 @@ class Page extends React.Component {
                   <table class="table table-bordered table-condensed table-hover">
                     <thead>
                       <tr>
-                        {componentTypesColumns.map((componentTypesColumn) => <th key={componentTypesColumn}>{componentTypesColumn}</th>)}
+                        {keyValue(componentTypeVM)
+                          .filter(filter => !filter.value.isHidden)
+                          .map((vm) => <th key={vm.key}>{vm.value.title}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {componentTypes.map((componentType, componentTypeKey) =>
-                        <tr key={componentTypeKey} onClick={this.clickHandler('componentType', componentType, 'selected')}>
-                          {componentTypesColumns.map((componentTypesColumn, componentTypesColumnKey) => <td key={`${componentTypeKey}-${componentTypesColumnKey}`}>{componentType[componentTypesColumn]}</td>)}
+                        <tr key={componentTypeKey} onClick={this.clickHandler('componentType', componentType, 'selected')} class={componentType === componentTypeSelected ? 'success' : ''}>
+                          {keyValue(componentTypeVM)
+                            .filter(filter => !filter.value.isHidden)
+                            .map((vm) => <td key={`${componentTypeKey}-${vm.key}`}>{componentType[vm.key]}</td>)}
                         </tr>
                       )}
                     </tbody>
