@@ -85,9 +85,12 @@ const componentTypeVM = {
   }
 }
 
+const localStorageRepo = (key, value) => value ? localStorage.setItem(key, JSON.stringify(value)) : JSON.parse(localStorage.setItem(key))
+
 class Page extends React.Component {
   title = 'The Page Title'
   tagLine = 'Tag Line'
+  ls = []
   // static async getInitialProps() {
   //   const res = await fetch('https://api.tvmaze.com/search/shows?q=batman')
   //   const data = await res.json()
@@ -111,6 +114,7 @@ class Page extends React.Component {
   }
   componentDidMount() {
     console.log(`componentDidMount (${this.title})`);
+    this.ls = localStorage
     this.componentTypeRead()
   }
   componentDidUpdate() {
@@ -241,6 +245,8 @@ class Page extends React.Component {
     this.setState(stateNew)
   }
 
+
+
   render() {
     const componentType = this.state.componentType
     const componentTypeSelected = this.state.componentType
@@ -250,6 +256,8 @@ class Page extends React.Component {
     const keyValue = (obj) => Object.keys(obj).map(key => {return {key, value: obj[key]}})
 
     console.log({componentType, componentTypes, componentTypeVM});
+
+    const ls = this.ls
 
     return (
       <Layout title="Eric's Test Page" tagLine="My Tests">
@@ -267,6 +275,7 @@ class Page extends React.Component {
                 .map((column) =>
                   <Input
                     type="text"
+                    key={column.key}
                     id={column.key}
                     label={column.value.title}
                     value={componentType[column.key] || ''}
@@ -311,7 +320,30 @@ class Page extends React.Component {
               My Footer
             </BoxFooter>
           </Box>
-
+          <Box context="primary">
+            <BoxHeader>LocalStorage Viewer</BoxHeader>
+            <BoxBody>
+                  <table class="table table-bordered table-condensed table-hover">
+                    <thead>
+                      <tr>Key</tr>
+                      <tr>Value</tr>
+                    </thead>
+                    <tbody>
+                      {keyValue(ls).map(kv =>
+                        <tr>
+                          <td>{kv.key}</td>
+                          <td>{kv.value}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                  || null
+                }
+            </BoxBody>
+            <BoxFooter>
+              My Footer
+            </BoxFooter>
+          </Box>
         </Row>
       </Layout>)
   }
