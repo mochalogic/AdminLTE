@@ -1,19 +1,25 @@
 'use strict';
+
+
 module.exports = (sequelize, DataTypes) => {
-  const ComponentType = sequelize.define(
-    'ComponentType',
-    {
-      name: {
-        type: DataTypes.STRING
-      },
-      category: {
-        type: DataTypes.STRING
-      },
-      version: {
-        type: DataTypes.INTEGER
-      }
+  const tableName = 'ComponentType'
+  const columns = {
+    name: {
+      type: DataTypes.STRING
     },
-    {});
+    category: {
+      type: DataTypes.STRING
+    },
+    version: {
+      type: DataTypes.INTEGER
+    }
+  }
+  const options = {}
+
+  const ComponentType = sequelize.define(tableName, columns, options);
+
+  console.log(ComponentType);
+
   ComponentType.associate = function(models) {
     // Classroom.hasMany(models.Student, {
     //   foreignKey: 'classroom_id',
