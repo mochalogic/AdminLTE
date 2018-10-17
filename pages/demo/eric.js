@@ -3,13 +3,11 @@ import Layout from '../../components/layout/Layout.js'
 import Link from 'next/link'
 import fetch from 'isomorphic-unfetch'
 import axios from 'axios'
+import {connect} from 'react-redux'
 
-import { bindActionCreators } from 'redux'
 
-//import { startClock, addCount, serverRenderClock } from '../../redux/store'
+import {componentType} from '../../redux/reducers'
 
-import componentType from '../../redux/reducers/componentType'
-import { connect } from 'react-redux'
 
 import {
   typeMatch, matchChild, builder,
@@ -53,21 +51,6 @@ import {
   H
 } from '../../components/base/Form'
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    componentTypeActions: componentType.actionDispatchs(dispatch)
-    // all: bindActionCreators(all, dispatch),
-    // select: bindActionCreators(select, dispatch),
-  }
-}
-
-const mapStateToProps = (state) => {
-  console.log({f: 'mapStateToProps', state})
-  return state
-  // return {componentType: state.componentType}
-}
-
-
 const componentTypeVM = {
   id: {
     title: 'ID',
@@ -97,17 +80,31 @@ const componentTypeVM = {
     title: 'Created On',
     description: 'The Version',
     isReadonly: true,
-    isHidden: false,
+    isHidden: true,
   },
   updatedAt: {
     title: 'Updated On',
     description: 'The Version',
     isReadonly: true,
-    isHidden: false,
+    isHidden: true,
   }
 }
 
 const localStorageRepo = (key, value = undefined) => value ? localStorage.setItem(key, JSON.stringify(value)) : JSON.parse(localStorage.getItem(key))
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    dispatchs: {
+      componentType: componentType.dispatchs(dispatch)
+    }
+  }
+}
+
+const mapStateToProps = (state) => {
+  // console.log({f: 'mapStateToProps', state})
+  return state
+  // return {componentType: state.componentType}
+}
 
 class Page extends React.Component {
   title = 'The Page Title'
@@ -119,31 +116,31 @@ class Page extends React.Component {
   //   console.log(`Show data fetched. Count: ${data.length}`)
   //   return {shows: data}
   // }
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
 
-    this.clickHandler = this.clickHandler.bind(this)
+    this.clickHandler  = this.clickHandler.bind(this)
     this.changeHandler = this.changeHandler.bind(this)
 
-    this.state = {
-      // componentType: {
-        // name: null,
-        // category: null,
-        // version: null
-      // },
-      // componentTypes: []
-    }
+    this.componentTypeClickHandler  = this.clickHandler(componentType.name).bind(this)
+    this.componentTypeChangeHandler = this.changeHandler(componentType.name).bind(this)
+
+    // this.state = {}
   }
   componentDidMount() {
-    console.log(`componentDidMount (${this.title})`);
+    // console.log(`componentDidMount (${this.title})`);
+    this.props.dispatchs.componentType.init()
+
     this.ls = localStorage
 
     const apiCaller = localStorageRepo('apiCaller')
     console.log({apiCaller});
     this.setState({...this.state, apiCaller})
+
+    this.loading = false
   }
   componentDidUpdate() {
-    console.log(`componentDidUpdate (${this.title})`);
+    // console.log(`componentDidUpdate (${this.title})`);
   }
 
   componentTypeRead() {
@@ -220,84 +217,180 @@ class Page extends React.Component {
   //   this.setState(stateNew)
   // }
 
-  clickHandler = (modelName, model, action) => (element) => {
-    const key = element.target.id
-    const value = element.target.value
+  clickHandler = reducerName => (model, action) => ({target: {id, value, ...target}, ...element}) => {
+    // const id = element.target.id
+    // const value = element.target.value
 
-    console.log({
-      element,
-      key,
-      value,
+    console.log({element, id, value, action, model});
 
-      action,
-      model
-    });
+    if (reducerName == componentType.name) {
+      switch (action || value) {
+        case 'saveAll':   break
+        case 'cancelAll': break
 
-    switch (action || value) {
-      case 'create':
-        return modelName == 'componentType' ? this.componentTypeCreate(model).then(() => this.componentTypeClear()) : null
-      case 'update':
-        return modelName == 'componentType' ? this.componentTypeUpdate(model).then(() => this.componentTypeClear()).catch((e) => console.log({f: 'catch', e})) : null
-      case 'delete':
-        // return modelName == 'componentType' ? this.componentTypeDelete(model).then(() => this.componentTypeClear()) : null
-        return this.props.componentTypeActions.delete(model)
-      case 'clear':
-        return modelName == 'componentType' ? this.componentTypeClear() : null
-      case 'selected':
-        return this.props.componentTypeActions.select(model)
-        // return modelName == 'componentType' ? this.componentTypeSelected(model) : null
-      case 'refresh':
-        return this.componentTypeRead()
-      case 'reduxTest':
-        console.log('reduxTest reduxTest reduxTest');
-        this.props.componentTypeActions.all()
-        return false
+        case 'save':      return this.props.dispatchs.componentType.save()
+        case 'delete':      return this.props.dispatchs.componentType.delete()
+        case 'copy':      return this.props.dispatchs.componentType.copy()
+        case 'new':       return this.props.dispatchs.componentType.new()
+        case 'cancel':    return this.props.dispatchs.componentType.cancel()
+        case 'active':    return this.props.dispatchs.componentType.active(model)
+        case 'select':    return this.props.dispatchs.componentType.select(model)
+        case 'clear':     return this.props.dispatchs.componentType.clear()
+        case 'list':      return this.props.dispatchs.componentType.list()
+      }
     }
+
   }
 
-  changeHandler = (modelName, columnName) => (element) => {
-    const key = element.target.id
-    const value = element.target.value
+  changeHandler = reducerName => columnName => ({target: {id, value, ...target}, ...element}) => {
+    // const id = element.target.id
+    // const value = element.target.value
 
-    if (modelName = 'componentType') {
-      const stateNew = {...this.state}
-      stateNew[modelName][columnName] = element.target.value
+    // console.log('changeHandler', {id, value, target, element});
 
-      // console.log({
-      //   state: this.state,
-      //   stateNew,
-      //   element,
-      //   key,
-      //   value,
-      //
-      //   modelName,
-      //   columnName
-      // });
-
-      this.setState(stateNew)
+    if (reducerName == componentType.name) {
+      this.props.dispatchs.componentType.edit({column: id, value})
     }
   }
 
   render() {
-    // const componentType = this.state.componentType
-    // const componentTypeSelected = this.state.componentType
-    // const componentTypes = this.state.componentTypes
-    // const keyValue(componentTypeVM) = componentTypes &&vm ? Object.keys(componentTypes[0]) : []
-
-    const componentType = this.props.componentType
-
     const keyValue = (obj) => Object.keys(obj).map(key => {return {key, value: obj[key]}})
 
-    console.log({
-      f: 'eric.render()',
+    const componentType = this.props.componentType
+    const rows = keyValue(componentType.muons)
+
+    console.log('eric:render', {
+      muons: this.props.componentType.muons,
       state: this.state,
       props: this.props,
-      // componentType,
-      // componentTypes,
-
-      componentTypeVM});
+      componentTypeVM,
+      rows,
+    });
 
     const ls = this.ls
+
+
+
+    const ComponentTypeList = () => (
+      <Box context="primary" xs="6">
+        <BoxHeader>Data</BoxHeader>
+        <BoxBody>
+          <table class="table table-bordered table-condensed table-hover">
+            <thead>
+              <tr>
+                {keyValue(componentTypeVM)
+                  .filter(filter => !filter.value.isHidden)
+                  .map((col) => <th key={col.key}>{col.value.title}</th>)}
+              </tr>
+            </thead>
+            {rows.length
+              &&
+                <tbody>
+                  {rows.map((row) =>
+                    <tr key={row.key}
+                        onClick={this.componentTypeClickHandler(row.value, 'active')}
+                        class={false
+                            || row.value.isNew && 'success'
+                            || row.value.isDirty && 'warning'
+                            || row.key == componentType.active && 'info'
+                            || row.value.isSelected && 'active'
+                            || ''}
+                        >
+                      {keyValue(componentTypeVM)
+                        .filter(filter => !filter.value.isHidden)
+                        .map((col) => <td key={`${row.key}-${col.key}`}>{row.value.current[col.key]}</td>)}
+                    </tr>
+                  )}
+                </tbody>
+              ||
+                <tbody>
+                  <tr>
+                    <td colSpan={keyValue(componentTypeVM).filter(filter => !filter.value.isHidden).length}><strong>No Records Found</strong></td>
+                  </tr>
+                </tbody>
+            }
+            </table>
+        </BoxBody>
+        <BoxFooter>
+          <Button id="list" label="List" context="primary" onClick={this.componentTypeClickHandler()} value="list"/>
+          <Button id="clear" label="Clear" context="danger" onClick={this.componentTypeClickHandler()} value="clear"/>
+          {rows.some(rows => rows.value.isDirty) &&
+            <>
+              <Button id="saveAll" label="Save All" context="success" onClick={this.componentTypeClickHandler()} value="saveAll" class="pull-right"/>
+              <Button id="cancelAll" label="Cancel All" context="default" onClick={this.componentTypeClickHandler()} value="cancelAll" class="pull-right"/>
+            </>
+          }
+        </BoxFooter>
+      </Box>
+    )
+
+    const ComponentTypeEntity = (
+      <Box context="success" xs="6">
+        <BoxHeader>Add</BoxHeader>
+        <BoxBody>
+          {keyValue(componentTypeVM)
+            .filter(filter => !filter.value.isReadonly)
+            .map((column) =>
+              <Input
+                type="text"
+                key={column.key}
+                id={column.key}
+                label={column.value.title}
+                readOnly={!componentType.active && 'readonly'}
+                value={componentType.active && componentType.muons[componentType.active].current[column.key] || ''}
+                onChange={this.componentTypeChangeHandler()} />
+            )
+          }
+        </BoxBody>
+        <BoxFooter>
+          {componentType.active
+            && <Button id="cancel" label="Cancel" context="default" onClick={this.componentTypeClickHandler()} value="cancel"/>}
+          {componentType.active
+            && componentType.active != 'NEW'
+            && <Button id="remove" label="Remove" context="danger" onClick={this.componentTypeClickHandler()} value="remove"/>}
+
+
+          {!componentType.active && <Button id="new" label="New" context="success" onClick={this.componentTypeClickHandler()} value="new" class="pull-right"/>}
+          {componentType.active && <Button id="save" label="Save" context="success" onClick={this.componentTypeClickHandler()} value="save" class="pull-right"/>}
+          {componentType.active
+            && componentType.active != 'NEW'
+            && <Button id="copy" label="Copy" context="warning" onClick={this.componentTypeClickHandler()} value="copy" class="pull-right"/>}
+
+          {/*
+          {componentType.selected.id && <Button id="update" label="Update" context="warning" onClick={this.clickHandler('componentType', componentType.selected)} value="update" class="pull-right" />}
+          {componentType.selected.id && <Button id="delete" label="Delete" context="danger" onClick={this.clickHandler('componentType', componentType.selected)} value="delete" class="pull-right" />}
+          {!componentType.selected.id && <Button id="create" label="Create" context="success" onClick={this.clickHandler('componentType', componentType.selected)} value="create" class="pull-right" />}
+           */}
+        </BoxFooter>
+      </Box>
+    )
+
+    const LocalStorageViewer = () => (
+      <Box context="primary">
+        <BoxHeader>LocalStorage Viewer</BoxHeader>
+        <BoxBody>
+          <table class="table table-bordered table-condensed table-hover">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {keyValue(ls).map((kv, k) =>
+                <tr key={k}>
+                  <td>{kv.key}</td>
+                  <td>{kv.value}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </BoxBody>
+        <BoxFooter>
+          My Footer
+        </BoxFooter>
+      </Box>
+    )
 
     return (
       <Layout title="Eric's Test Page" tagLine="My Tests">
@@ -307,142 +400,56 @@ class Page extends React.Component {
           }
         `}</style>
         <Row>
-          <Box context="success" xs="6">
-            <BoxHeader>Entry Points</BoxHeader>
-            <BoxBody>
-              {this.props.count}
-            </BoxBody>
-            <BoxFooter>
-              <table class="table table-bordered table-condensed table-hover">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Method</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
-
-              <Input type="text" label="Name" value={this.state.entryPoint && this.state.entryPoint.name} onChange={this.changeHandler('entryPoint', 'name')}>
-                <InputButton right>
-                  <Button id="create" label="Create" context="success" onClick={this.clickHandler('entryPoint')} value="create" class="pull-right" />
-                </InputButton>
-              </Input>
-            </BoxFooter>
-          </Box>
-
-          <Box context="success" xs="6">
-            <BoxHeader>API Caller</BoxHeader>
-            <BoxBody>
-              <Input type="text" label="URL" />
-              <Input type="text" label="Header" />
-              <Input type="text" label="Parameter: Name" />
-              <Input type="textarea" label="JSON" rows="10" />
-            </BoxBody>
-            <BoxFooter>
-              <Button id="reduxTest" label="reduxTest" context="warning" onClick={this.clickHandler('reduxTest')} value="reduxTest" class="pull-right" />
-            </BoxFooter>
-          </Box>
-
-          <Box context="primary" xs="6">
-            <BoxHeader>Data</BoxHeader>
-            <BoxBody>
-              <table class="table table-bordered table-condensed table-hover">
-                <thead>
-                  <tr>
-                    {keyValue(componentTypeVM)
-                      .filter(filter => !filter.value.isHidden)
-                      .map((col) => <th key={col.key}>{col.value.title}</th>)}
-                  </tr>
-                </thead>
-                {componentType && componentType.rows && componentType.rows.length &&
-                  <tbody>
-                    {componentType.rows.map((row, rowKey) =>
-                      <tr key={rowKey}
-                          onClick={this.clickHandler('componentType', row, 'selected')}
-                          class={row === componentType.selected ? 'success' : ''}>
-                        {keyValue(componentTypeVM)
-                          .filter(filter => !filter.value.isHidden)
-                          .map((col) => <td key={`${rowKey}-${col.key}`}>{row[col.key]}</td>)}
-                      </tr>
-                    )}
-                  </tbody> ||
-                  <tbody>
-                    <tr>
-                      <td colSpan={
-                        keyValue(componentTypeVM)
-                          .filter(filter => !filter.value.isHidden)
-                          .length
-                      }><strong>No Records Found</strong></td>
-                    </tr>
-                  </tbody>
-                }
-                </table>
-            </BoxBody>
-            <BoxFooter>
-              My Footer
-            </BoxFooter>
-          </Box>
-
-
-          <Box context="success" xs="6">
-            <BoxHeader>Add</BoxHeader>
-            <BoxBody>
-              {keyValue(componentTypeVM)
-                .filter(filter => !filter.value.isReadonly)
-                .map((column) =>
-                  <Input
-                    type="text"
-                    key={column.key}
-                    id={column.key}
-                    label={column.value.title}
-                    value={componentType.selected[column.key] || ''}
-                    onChange={this.changeHandler('componentType', column.key)} />
-                )
-              }
-            </BoxBody>
-            <BoxFooter>
-              <Button id="clear" label="Clear" context="info" onClick={this.clickHandler('componentType', componentType)} value="clear"/>
-              <Button id="refresh" label="Refresh" context="default" onClick={this.clickHandler('componentType', componentType)} value="refresh"/>
-              {componentType.selected.id && <Button id="update" label="Update" context="warning" onClick={this.clickHandler('componentType', componentType.selected)} value="update" class="pull-right" />}
-              {componentType.selected.id && <Button id="delete" label="Delete" context="danger" onClick={this.clickHandler('componentType', componentType.selected)} value="delete" class="pull-right" />}
-              {!componentType.selected.id && <Button id="create" label="Create" context="success" onClick={this.clickHandler('componentType', componentType.selected)} value="create" class="pull-right" />}
-            </BoxFooter>
-          </Box>
-
-
-          <Box context="primary">
-            <BoxHeader>LocalStorage Viewer</BoxHeader>
-            <BoxBody>
-              <table class="table table-bordered table-condensed table-hover">
-                <thead>
-                  <tr>
-                    <th>Key</th>
-                    <th>Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {keyValue(ls).map(kv =>
-                    <tr>
-                      <td>{kv.key}</td>
-                      <td>{kv.value}</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </BoxBody>
-            <BoxFooter>
-              My Footer
-            </BoxFooter>
-          </Box>
-
+          <ComponentTypeList/>
+          {ComponentTypeEntity}
+          <LocalStorageViewer/>
         </Row>
       </Layout>)
   }
 }
 
-
-
 export default connect(mapStateToProps, mapDispatchToProps)(Page)
+
+
+
+
+{/*
+<Box context="success" xs="6">
+  <BoxHeader>Entry Points</BoxHeader>
+  <BoxBody>
+    {this.props.count}
+  </BoxBody>
+  <BoxFooter>
+    <table class="table table-bordered table-condensed table-hover">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Method</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+
+    <Input type="text" label="Name" value={this.state.entryPoint && this.state.entryPoint.name} onChange={this.changeHandler('entryPoint', 'name')}>
+      <InputButton right>
+        <Button id="create" label="Create" context="success" onClick={this.clickHandler('entryPoint')} value="create" class="pull-right" />
+      </InputButton>
+    </Input>
+  </BoxFooter>
+</Box>
+
+<Box context="success" xs="6">
+  <BoxHeader>API Caller</BoxHeader>
+  <BoxBody>
+    <Input type="text" label="URL" />
+    <Input type="text" label="Header" />
+    <Input type="text" label="Parameter: Name" />
+    <Input type="textarea" label="JSON" rows="10" />
+  </BoxBody>
+  <BoxFooter>
+    <Button id="reduxTest" label="reduxTest" context="warning" onClick={this.clickHandler('reduxTest')} value="reduxTest" class="pull-right" />
+  </BoxFooter>
+</Box>
+ */}

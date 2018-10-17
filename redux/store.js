@@ -1,42 +1,49 @@
 import { createStore, applyMiddleware } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import thunkMiddleware from 'redux-thunk'
-
 import reducers from './reducers'
 
-// const exampleInitialState = {
-//   lastUpdate: 0,
-//   light: false,
-//   count: 0
-// }
-// export const actionTypes = {
-//   ADD: 'ADD',
-//   TICK: 'TICK'
-// }
-// export const reducer = (state = exampleInitialState, action) => {
-//   switch (action.type) {
-//     case actionTypes.TICK:
-//       return Object.assign({}, state, { lastUpdate: action.ts, light: !!action.light })
-//     case actionTypes.ADD:
-//       return Object.assign({}, state, {
-//         count: state.count + 1
-//       })
-//     default: return state
-//   }
-// }
-// ACTIONS
-// export const serverRenderClock = (isServer) => dispatch => {
-//   return dispatch({ type: actionTypes.TICK, light: !isServer, ts: Date.now() })
-// }
-// export const startClock = () => dispatch => {
-//   return setInterval(() => dispatch({ type: actionTypes.TICK, light: true, ts: Date.now() }), 1000)
-// }
-// export const addCount = () => dispatch => {
-//   return dispatch({ type: actionTypes.ADD })
-// }
 
 
-export const initStore = (initialState) => createStore(reducers, composeWithDevTools(applyMiddleware(thunkMiddleware)))
+
+const asyncDispatchMiddleware = store => next => action => {
+  let syncActivityFinished = false;
+  let actionQueue = [];
+
+  function flushQueue() {
+    actionQueue.forEach(a => store.dispatch(a)); // flush queue
+    actionQueue = [];
+  }
+
+  function dispatch(asyncAction) {
+    actionQueue = actionQueue.concat([asyncAction]);
+
+    if (syncActivityFinished) {
+      flushQueue();
+    }
+  }
+
+  const actionWithAsyncDispatch = Object.assign({}, action, { dispatch });
+
+  const res = next(actionWithAsyncDispatch);
+
+  syncActivityFinished = true;
+
+  flushQueue();
+
+  return res
+};
+
+
+
+
+
+
+const store = createStore(reducers, composeWithDevTools(applyMiddleware(thunkMiddleware, asyncDispatchMiddleware)))
+// const d = store.dispatch({type: 'EricINIT'})
+// console.log({f:'store', store, d});
+
+export const initStore = (initialState) => store
 
 // export const initStore = (initialState = exampleInitialState) => {
 //   return createStore(combined, initialState, composeWithDevTools(applyMiddleware(thunkMiddleware)))

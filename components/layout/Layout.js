@@ -30,10 +30,18 @@ const axiosRegisterNProgress = () => {
 
 
 class Layout extends React.Component {
+  constructor() {
+    super()
+
+    this.state = {
+      loading: true
+    }
+  }
   componentDidMount()  {
     axiosRegisterNProgress()
 
     this.legacyCode()
+    this.setState({...this.state, loading: false})
   }
   componentDidUpdate() {
     this.legacyCode()
@@ -120,6 +128,69 @@ class Layout extends React.Component {
         <script src="/adminlte/dist/js/demo.js"></script>
       </>)
 
+    const Loading = (
+      <div class="loading">
+        <style jsx global>{`
+          .loading {
+            height:100%;
+            background:black;
+            float:left;
+            top:0;
+            left:0;
+            display:table;
+            position:absolute;
+            z-index:10000;
+            width:100%;
+            opacity:.25;
+            text-align:center;
+            vertical-align:middle;
+            color: white;
+            font-size: 100px;
+          }
+          .loadingSpinner {
+            vertical-align: middle;
+            display: table-cell;
+            animation-name: spin;
+            animation-duration: 2000ms;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+          }
+          @keyframes spin {
+            from {
+              transform:rotate(0deg);
+            }
+            to {
+              transform:rotate(360deg);
+            }
+          }
+        `}</style>
+        <Icon name="fa-spinner" class="loadingSpinner"/>
+      </div>)
+
+    const Wrapper = (
+      <div class="wrapper">
+        <Header/>
+        <SidebarLeft/>
+        <div class="content-wrapper">
+          <section class="content-header">
+            <h1>{title}<small>{tagLine}</small></h1>
+            <ol class="breadcrumb">
+              <li>
+                <Link href="/demo">
+                  <a><Icon name="fa-dashboard"/>Home</a>
+                </Link>
+              </li>
+              <li class="active">{title}</li>
+            </ol>
+          </section>
+          <section class="content">
+            {children}
+          </section>
+        </div>
+        <Footer/>
+        <SidebarRight/>
+      </div>)
+
     return (
       <>
         <Head>
@@ -131,28 +202,7 @@ class Layout extends React.Component {
           {AdminLteFoot}
         </Head>
         <NProgressStyles color="#FF0000" spinner={true} />
-        <div class="wrapper">
-          <Header/>
-          <SidebarLeft/>
-          <div class="content-wrapper">
-            <section class="content-header">
-              <h1>{title}<small>{tagLine}</small></h1>
-              <ol class="breadcrumb">
-                <li>
-                  <Link href="/demo">
-                    <a><Icon name="fa-dashboard"/>Home</a>
-                  </Link>
-                </li>
-                <li class="active">{title}</li>
-              </ol>
-            </section>
-            <section class="content">
-              {children}
-            </section>
-          </div>
-          <Footer/>
-          <SidebarRight/>
-        </div>
+        {this.state.loading ? Loading : Wrapper}
       </>
     )
   }

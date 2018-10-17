@@ -1,13 +1,14 @@
-export const Icon = ({name, color = null, bg = null}) => {
+export const Icon = ({name, className, color = null, bg = null}) => {
   if (!name) return null;
 
   switch (true) {
     case name.startsWith('ion-'):
-      return <i class={`ion ${name}`}/>
+      className = `ion ${name} ${className}`
     case name.startsWith('fa-'):
-      return <i class={`fa ${name}`}/>
-    default:
+      className = `fa ${name} ${className}`
   }
+
+  return <i class={className}/>
 }
 
 export default Icon

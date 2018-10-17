@@ -355,12 +355,12 @@ class SidebarLeft extends React.Component {
   title = 'SidebarLeft'
   tagLine = 'Preview'
   componentDidMount() {
-    console.log(`componentDidMount (${this.title})`);
+    // console.log(`componentDidMount (${this.title})`);
     this.setState({routeCurrent: (Router && Router.router && Router.router.route)})
     legacyCode();
   }
   componentDidUpdate() {
-    console.log(`componentDidUpdate (${this.title})`);
+    // console.log(`componentDidUpdate (${this.title})`);
     legacyCode();
   }
   render() {
